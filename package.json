@@ -1,0 +1,14 @@
+{
+  "name": "screenplay-example",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "cucumber-js --tags 'not @todo'"
+  },
+  "author": "Matt Wynne",
+  "license": "MIT",
+  "dependencies": {
+    "cucumber": "^6.0.2"
+  }
+}
