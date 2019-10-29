@@ -8,13 +8,12 @@ CreateAccount = {
 }
 
 class Actor {
-  constructor(name, abilities) {
+  constructor(abilities) {
     this.abilities = abilities
-    this.name = name
   }
 
   attemptsTo(task) {
-    task({ name: this.name, ...this.abilities })
+    task(this.abilities)
   }
 }
 
@@ -24,7 +23,7 @@ defineParameterType({
   name: 'actor',
   regexp: /\w+/,
   transformer: function(name) {
-    return new Actor(name, this)
+    return new Actor({ name, ...this })
   }
 })
 
