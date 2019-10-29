@@ -18,8 +18,17 @@ class Actor {
   }
 }
 
-Given('{word} has created an account', function (name) {
-  const actor = new Actor(name, this)
+const { defineParameterType } = require('cucumber')
+
+defineParameterType({
+  name: 'actor',
+  regexp: /\w+/,
+  transformer: function(name) {
+    return new Actor(name, this)
+  }
+})
+
+Given('{actor} has created an account', function (actor) {
   actor.attemptsTo(CreateAccount.forThemselves)
 })
 
