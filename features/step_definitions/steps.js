@@ -1,8 +1,9 @@
 const { Given, When, Then } = require('cucumber')
 const { assertThat, is, not, matchesPattern, hasItem, isEmpty } = require('hamjest')
+const { Account } = require('../../lib/app')
 
 Given('{word} has created an account', function (name) {
-  this.createAccount({ name })
+  this.app.accounts[name] = new Account({ name })
 })
 
 When('{word} tries to sign in', function (name) {
