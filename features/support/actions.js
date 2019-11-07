@@ -1,7 +1,7 @@
 const { Account } = require('../../lib/app')
 
 const CreateAccount = {
-  forThemselves: ({ name, app }) => 
+  forThemselves: ({ name, app }) =>
     app.accounts[name] = new Account({ name })
 }
 
