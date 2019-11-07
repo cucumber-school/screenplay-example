@@ -2,8 +2,25 @@ const { Given, When, Then } = require('cucumber')
 const { assertThat, is, not, matchesPattern, hasItem, isEmpty } = require('hamjest')
 const { Account } = require('../../lib/app')
 
+CreateAccount = {
+  forThemselves: 
+    ({ name, app }) => app.accounts[name] = new Account({ name })
+}
+
+class Actor {
+  constructor(name, abilities) {
+    this.abilities = abilities
+    this.name = name
+  }
+
+  attemptsTo(task) {
+    task({ name: this.name, ...this.abilities })
+  }
+}
+
 Given('{word} has created an account', function (name) {
-  this.app.accounts[name] = new Account({ name })
+  const actor = new Actor(name, this)
+  actor.attemptsTo(CreateAccount.forThemselves)
 })
 
 When('{word} tries to sign in', function (name) {
