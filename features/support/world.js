@@ -6,15 +6,6 @@ Before(function () {
 })
 
 class DomainDriver {
-  createAccount({ name }) {
-    this.app.accounts[name] = new Account({ name })
-  }
-
-  activateAccount({ name }) {
-    this.app.getAccount(name).activate()
-    this.app.authenticate({ name })
-  }
-
   getProjects({ name }) {
     return this.app.getSession(name).projects
   }

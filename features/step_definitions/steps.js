@@ -7,13 +7,27 @@ CreateAccount = {
     ({ name, app }) => app.accounts[name] = new Account({ name })
 }
 
+const ActivateAccount = ({ name, app }) => {
+  app.getAccount(name).activate()
+  app.authenticate({ name })
+}
+
+const CreateProject = {
+  named: projectName =>
+    ({ name, app }) =>
+      app.getSession(name).createProject({ name: projectName })
+}
+
+const SignIn = ({name, app}) => app.authenticate({ name })
+
 class Actor {
   constructor(abilities) {
     this.abilities = abilities
   }
 
-  attemptsTo(task) {
-    task(this.abilities)
+  attemptsTo(...tasks) {
+    for (const task of tasks)
+      task(this.abilities)
   }
 }
 
@@ -31,34 +45,23 @@ Given('{actor} has created an account', function (actor) {
   actor.attemptsTo(CreateAccount.forThemselves)
 })
 
-const SignIn = ({name, app}) => app.authenticate({ name })
-
 When('{actor} tries to sign in', function (actor) {
   actor.attemptsTo(SignIn)
 })
-
-const ActivateAccount = ({ name, app }) => {
-  app.getAccount(name).activate()
-  app.authenticate({ name })
-}
 
 When('{actor} activates his/her account', function (actor) {
   actor.attemptsTo(ActivateAccount)
 })
 
-const CreateProject = {
-  named: projectName =>
-    ({ name, app }) =>
-      app.getSession(name).createProject({ name: projectName })
-}
-
 When('{actor} (tries to )create(s) a project', function (actor) {
   actor.attemptsTo(CreateProject.named('a-project'))
 })
 
-Given('{word} has signed up', function (name) {
-  this.createAccount({ name })
-  this.activateAccount({ name })
+Given('{actor} has signed up', function (actor) {
+  actor.attemptsTo(
+    CreateAccount.forThemselves,
+    ActivateAccount
+  )
 })
 
 Then('{word} should see the project', function (name) {
