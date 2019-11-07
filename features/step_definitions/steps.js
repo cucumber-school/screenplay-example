@@ -31,21 +31,34 @@ Given('{actor} has created an account', function (actor) {
   actor.attemptsTo(CreateAccount.forThemselves)
 })
 
-When('{word} tries to sign in', function (name) {
-  this.signIn({ name })
+const SignIn = ({name, app}) => app.authenticate({ name })
+
+When('{actor} tries to sign in', function (actor) {
+  actor.attemptsTo(SignIn)
 })
 
-When('{word} activates his/her account', function (name) {
-  this.activateAccount({ name })
+const ActivateAccount = ({ name, app }) => {
+  app.getAccount(name).activate()
+  app.authenticate({ name })
+}
+
+When('{actor} activates his/her account', function (actor) {
+  actor.attemptsTo(ActivateAccount)
+})
+
+const CreateProject = {
+  named: projectName =>
+    ({ name, app }) =>
+      app.getSession(name).createProject({ name: projectName })
+}
+
+When('{actor} (tries to )create(s) a project', function (actor) {
+  actor.attemptsTo(CreateProject.named('a-project'))
 })
 
 Given('{word} has signed up', function (name) {
   this.createAccount({ name })
   this.activateAccount({ name })
-})
-
-When('{word} (tries to )create(s) a project', function (name) {
-  this.createProject({ name, project: { name: 'a-project' }})
 })
 
 Then('{word} should see the project', function (name) {
