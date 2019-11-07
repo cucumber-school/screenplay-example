@@ -2,9 +2,9 @@ const { Given, When, Then } = require('cucumber')
 const { assertThat, is, not, matchesPattern, hasItem, isEmpty } = require('hamjest')
 const { Account } = require('../../lib/app')
 
-CreateAccount = {
-  forThemselves: 
-    ({ name, app }) => app.accounts[name] = new Account({ name })
+const CreateAccount = {
+  forThemselves: ({ name, app }) =>
+    app.accounts[name] = new Account({ name })
 }
 
 const ActivateAccount = ({ name, app }) => {
@@ -22,7 +22,10 @@ const SignIn = ({name, app}) => app.authenticate({ name })
 
 class Actor {
   constructor(abilities) {
-    this.abilities = abilities
+    this.abilities = {
+      ...abilities,
+      attemptsTo: this.attemptsTo.bind(this)
+    }
   }
 
   attemptsTo(...tasks) {
@@ -57,11 +60,14 @@ When('{actor} (tries to )create(s) a project', function (actor) {
   actor.attemptsTo(CreateProject.named('a-project'))
 })
 
-Given('{actor} has signed up', function (actor) {
-  actor.attemptsTo(
+const SignUp = ({ attemptsTo }) =>
+  attemptsTo(
     CreateAccount.forThemselves,
     ActivateAccount
   )
+
+Given('{actor} has signed up', function (actor) {
+  actor.attemptsTo(SignUp)
 })
 
 Then('{word} should see the project', function (name) {
