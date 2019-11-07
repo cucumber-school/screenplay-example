@@ -34,6 +34,9 @@ class Actor {
   }
 }
 
+const checkThat = (question, matcher) =>
+  abilities => assertThat(question(abilities), matcher)
+
 const { defineParameterType } = require('cucumber')
 
 defineParameterType({
@@ -70,32 +73,60 @@ Given('{actor} has signed up', function (actor) {
   actor.attemptsTo(SignUp)
 })
 
-Then('{word} should see the project', function (name) {
-  assertThat(
-    this.getProjects({ name }),
-    hasItem({ name: 'a-project' })
+const ProjectsVisible =
+  ({ name, app }) =>
+    app.getSession(name).projects
+
+const IsAuthenticated =
+  ({ name, app }) =>
+    app.getSession(name).isAuthenticated
+
+const AuthenticationError =
+  ({ name, app }) =>
+    app.getSession(name).error
+
+Then('{actor} should see the project', function (actor) {
+  actor.attemptsTo(
+    checkThat(
+      ProjectsVisible,
+      hasItem({ name: 'a-project' })
+    )
   )
 })
 
-Then('{word} should not see any projects', function (name) {
-  assertThat(
-    this.getProjects({ name }),
-    isEmpty()
+Then('{actor} should not see any projects', function (actor) {
+  actor.attemptsTo(
+    checkThat(
+      ProjectsVisible,
+      isEmpty()
+    )
   )
 })
 
-Then('{word} should not be authenticated', function (name) {
-  assertThat(this.isAuthenticated({ name }), is(not(true)))
+Then('{actor} should not be authenticated', function (actor) {
+  actor.attemptsTo(
+    checkThat(
+      IsAuthenticated,
+      is(not(true))
+    )
+  )
 })
 
-Then('{word} should be authenticated', function (name) {
-  assertThat(this.isAuthenticated({ name }), is(true))
+Then('{actor} should be authenticated', function (actor) {
+  actor.attemptsTo(
+    checkThat(
+      IsAuthenticated,
+      is(true)
+    )
+  )
 })
 
-Then('{word} should see an error telling him/her to activate the account', function (name) {
-  assertThat(
-    this.authenticationError({ name }),
-    matchesPattern(/activate your account/)
+Then('{actor} should see an error telling him/her to activate the account', function (actor) {
+  actor.attemptsTo(
+    checkThat(
+      AuthenticationError,
+      matchesPattern(/activate your account/)
+    )
   )
 })
 
