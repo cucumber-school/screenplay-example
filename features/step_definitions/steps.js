@@ -1,5 +1,5 @@
 const { Given, When, Then } = require('cucumber')
-const { assertThat, is, not, matchesPattern } = require('hamjest')
+const { assertThat, is, not, matchesPattern, hasItem, isEmpty } = require('hamjest')
 
 Given('{word} has created an account', function (name) {
   this.createAccount({ name })
@@ -11,6 +11,29 @@ When('{word} tries to sign in', function (name) {
 
 When('{word} activates his/her account', function (name) {
   this.activateAccount({ name })
+})
+
+Given('{word} has signed up', function (name) {
+  this.createAccount({ name })
+  this.activateAccount({ name })
+})
+
+When('{word} (tries to )create(s) a project', function (name) {
+  this.createProject({ name, project: { name: 'a-project' }})
+})
+
+Then('{word} should see the project', function (name) {
+  assertThat(
+    this.getProjects({ name }),
+    hasItem({ name: 'a-project' })
+  )
+})
+
+Then('{word} should not see any projects', function (name) {
+  assertThat(
+    this.getProjects({ name }),
+    isEmpty()
+  )
 })
 
 Then('{word} should not be authenticated', function (name) {
@@ -27,3 +50,4 @@ Then('{word} should see an error telling him/her to activate the account', funct
     matchesPattern(/activate your account/)
   )
 })
+
