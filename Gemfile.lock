@@ -2,14 +2,14 @@ GEM
   remote: https://rubygems.org/
   specs:
     asciidoctor (2.0.10)
-    coderay (1.1.2)
+    rouge (3.13.0)
 
 PLATFORMS
   ruby
 
 DEPENDENCIES
   asciidoctor
-  coderay
+  rouge
 
 BUNDLED WITH
    2.0.1
