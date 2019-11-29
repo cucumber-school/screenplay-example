@@ -618,7 +618,21 @@ This pattern is a way out of that.</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="rouge highlight"><code data-lang="gherkin"><span class="err">Unresolved directive in index.adoc - include</span><span class="p">::</span><span class="err">code/00-add-sign-up-feature/features/sign_up.feature[]</span></code></pre>
+<pre class="rouge highlight"><code data-lang="gherkin"><span class="kd">Feature</span><span class="p">:</span> Sign up
+
+  New accounts need to confirm their email to activate
+  their account.
+
+  <span class="kn">Scenario</span><span class="p">:</span> Successful sign-up
+    <span class="nf">Given </span>Tanya has created an account
+    <span class="nf">When </span>Tanya activates her account
+    <span class="nf">Then </span>Tanya should be authenticated
+
+  <span class="kn">Scenario</span><span class="p">:</span> Try to sign in without activating account
+    <span class="nf">Given </span>Bob has created an account
+    <span class="nf">When </span>Bob tries to sign in
+    <span class="nf">Then </span>Bob should not be authenticated
+    <span class="nf">And </span>Bob should see an error telling him to activate the account</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -629,7 +643,35 @@ This pattern is a way out of that.</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="rouge highlight"><code data-lang="js"><span class="nx">Unresolved</span> <span class="nx">directive</span> <span class="k">in</span> <span class="nx">index</span><span class="p">.</span><span class="nx">adoc</span> <span class="o">-</span> <span class="nx">include</span><span class="p">::</span><span class="nx">code</span><span class="o">/</span><span class="mi">00</span><span class="o">-</span><span class="nx">add</span><span class="o">-</span><span class="nx">sign</span><span class="o">-</span><span class="nx">up</span><span class="o">-</span><span class="nx">feature</span><span class="o">/</span><span class="nx">features</span><span class="o">/</span><span class="nx">step_definitions</span><span class="o">/</span><span class="nx">steps</span><span class="p">.</span><span class="nx">js</span><span class="p">[]</span></code></pre>
+<pre class="rouge highlight"><code data-lang="js"><span class="kd">const</span> <span class="p">{</span> <span class="nx">Given</span><span class="p">,</span> <span class="nx">When</span><span class="p">,</span> <span class="nx">Then</span> <span class="p">}</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="dl">'</span><span class="s1">cucumber</span><span class="dl">'</span><span class="p">)</span>
+<span class="kd">const</span> <span class="p">{</span> <span class="nx">assertThat</span><span class="p">,</span> <span class="nx">is</span><span class="p">,</span> <span class="nx">not</span><span class="p">,</span> <span class="nx">matchesPattern</span> <span class="p">}</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="dl">'</span><span class="s1">hamjest</span><span class="dl">'</span><span class="p">)</span>
+
+<span class="nx">Given</span><span class="p">(</span><span class="dl">'</span><span class="s1">{word} has created an account</span><span class="dl">'</span><span class="p">,</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">name</span><span class="p">)</span> <span class="p">{</span>
+  <span class="k">this</span><span class="p">.</span><span class="nx">createAccount</span><span class="p">({</span> <span class="nx">name</span> <span class="p">})</span>
+<span class="p">})</span>
+
+<span class="nx">When</span><span class="p">(</span><span class="dl">'</span><span class="s1">{word} tries to sign in</span><span class="dl">'</span><span class="p">,</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">name</span><span class="p">)</span> <span class="p">{</span>
+  <span class="k">this</span><span class="p">.</span><span class="nx">signIn</span><span class="p">({</span> <span class="nx">name</span> <span class="p">})</span>
+<span class="p">})</span>
+
+<span class="nx">When</span><span class="p">(</span><span class="dl">'</span><span class="s1">{word} activates his/her account</span><span class="dl">'</span><span class="p">,</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">name</span><span class="p">)</span> <span class="p">{</span>
+  <span class="k">this</span><span class="p">.</span><span class="nx">activateAccount</span><span class="p">({</span> <span class="nx">name</span> <span class="p">})</span>
+<span class="p">})</span>
+
+<span class="nx">Then</span><span class="p">(</span><span class="dl">'</span><span class="s1">{word} should not be authenticated</span><span class="dl">'</span><span class="p">,</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">name</span><span class="p">)</span> <span class="p">{</span>
+  <span class="nx">assertThat</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">isAuthenticated</span><span class="p">({</span> <span class="nx">name</span> <span class="p">}),</span> <span class="nx">is</span><span class="p">(</span><span class="nx">not</span><span class="p">(</span><span class="kc">true</span><span class="p">)))</span>
+<span class="p">})</span>
+
+<span class="nx">Then</span><span class="p">(</span><span class="dl">'</span><span class="s1">{word} should be authenticated</span><span class="dl">'</span><span class="p">,</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">name</span><span class="p">)</span> <span class="p">{</span>
+  <span class="nx">assertThat</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">isAuthenticated</span><span class="p">({</span> <span class="nx">name</span> <span class="p">}),</span> <span class="nx">is</span><span class="p">(</span><span class="kc">true</span><span class="p">))</span>
+<span class="p">})</span>
+
+<span class="nx">Then</span><span class="p">(</span><span class="dl">'</span><span class="s1">{word} should see an error telling him/her to activate the account</span><span class="dl">'</span><span class="p">,</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">name</span><span class="p">)</span> <span class="p">{</span>
+  <span class="nx">assertThat</span><span class="p">(</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">authenticationError</span><span class="p">({</span> <span class="nx">name</span> <span class="p">}),</span>
+    <span class="nx">matchesPattern</span><span class="p">(</span><span class="sr">/activate your account/</span><span class="p">)</span>
+  <span class="p">)</span>
+<span class="p">})</span></code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -766,7 +808,7 @@ Here&#8217;s the feature file:</p>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2019-11-28 22:48:10 UTC
+Last updated 2019-11-29 09:11:55 UTC
 </div>
 </div>
 <style>
