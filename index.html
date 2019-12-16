@@ -459,10 +459,10 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <li><a href="#_time_for_an_example">Time for an example</a></li>
 <li><a href="#_where_do_the_helper_methods_live">Where do the helper methods live?</a></li>
 <li><a href="#_a_new_requirement">A new requirement</a></li>
-</ul>
-</li>
 <li><a href="#_cracks_are_appearing">Cracks are appearing</a></li>
 <li><a href="#_what_about_page_objects">What about Page Objects?</a></li>
+</ul>
+</li>
 </ul>
 </div>
 </div>
@@ -532,10 +532,10 @@ This pattern is a way out of that.</p>
 <h2 id="_the_fundamentals_of_screenplay">The fundamentals of Screenplay</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>The fundamental element of the Screenplay pattern is an Interaction. Instead of having the code that interacts with our app littered around in helper methods or page objects, we separate and encapsulate each tiny granule of work as an individual object, each with the same interface: a single method that allows us to run that action against our app.</p>
+<p>The fundamental element of the Screenplay pattern is an <em>Interaction</em>. Instead of having the code that interacts with our app littered around in helper methods or page objects, we separate and encapsulate each tiny granule of work as an individual object, each with the same interface: a single method that allows us to run that action against our app.</p>
 </div>
 <div class="paragraph">
-<p>For example, you might have an Interaction like InsertInto which knows how to insert a record into an SQL database table. Or you might have an Interaction like WriteTo that can write to a text file on disk. Or an Interaction like FillIn which can put text into a field in a browser. Or an Interaction like PostJson that sends a payload to an API endpoint.</p>
+<p>For example, you might have an Interaction like <code>InsertInto</code> which knows how to insert a record into an SQL database table. Or you might have an Interaction like <code>WriteTo</code> that can write to a text file on disk. Or an Interaction like <code>FillIn</code> which can put text into a field in a browser. Or an Interaction like <code>PostJson</code> that sends a payload to an API endpoint.</p>
 </div>
 <div class="paragraph">
 <p>Then, we express the behaviour we want in our tests by creating lists of these Interaction objects that we want to execute, like:</p>
@@ -715,17 +715,108 @@ This pattern is a way out of that.</p>
 <div class="sect2">
 <h3 id="_a_new_requirement">A new requirement</h3>
 <div class="paragraph">
-<p>As they tend to do from time to time, our product owner would like this app of ours to do something new. She has an idea that our app will have projects that users with existing accounts can create. I don&#8217;t know where she gets these wild ideas.
-Here&#8217;s the feature file:</p>
+<p>As they tend to do from time to time, our product owner would like this app of ours to do something new. She has an idea that our app will have projects that users with existing accounts can create. I don&#8217;t know where she gets these wild ideas.</p>
+</div>
+<div class="paragraph">
+<p>Here&#8217;s the feature file:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="gherkin"><span class="kd">Feature</span><span class="p">:</span> Create project
+
+  Users can create projects, only visible to themselves
+
+  <span class="kn">Scenario</span><span class="p">:</span> Create one project
+    <span class="nf">Given </span>Sue has signed up
+    <span class="nf">When </span>Sue creates a project
+    <span class="nf">Then </span>Sue should see the project
+
+  <span class="kn">Scenario</span><span class="p">:</span> Try to see someone else's project
+    <span class="nf">Given </span>Sue has signed up
+    <span class="nf">And </span>Bob has signed up
+    <span class="nf">When </span>Sue creates a project
+    <span class="nf">Then </span>Bob should not see any projects</code></pre>
+</div>
 </div>
 <div class="paragraph">
 <p>We&#8217;ve introduced a handful of new steps here. Let&#8217;s look at how these are defined:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="js"><span class="kd">const</span> <span class="p">{</span> <span class="nx">Given</span><span class="p">,</span> <span class="nx">When</span><span class="p">,</span> <span class="nx">Then</span> <span class="p">}</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="dl">'</span><span class="s1">cucumber</span><span class="dl">'</span><span class="p">)</span>
+<span class="kd">const</span> <span class="p">{</span> <span class="nx">assertThat</span><span class="p">,</span> <span class="nx">is</span><span class="p">,</span> <span class="nx">not</span><span class="p">,</span> <span class="nx">matchesPattern</span><span class="p">,</span> <span class="nx">hasItem</span><span class="p">,</span> <span class="nx">isEmpty</span> <span class="p">}</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="dl">'</span><span class="s1">hamjest</span><span class="dl">'</span><span class="p">)</span>
+
+<span class="nx">Given</span><span class="p">(</span><span class="dl">'</span><span class="s1">{word} has created an account</span><span class="dl">'</span><span class="p">,</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">name</span><span class="p">)</span> <span class="p">{</span>
+  <span class="k">this</span><span class="p">.</span><span class="nx">createAccount</span><span class="p">({</span> <span class="nx">name</span> <span class="p">})</span>
+<span class="p">})</span>
+
+<span class="nx">When</span><span class="p">(</span><span class="dl">'</span><span class="s1">{word} tries to sign in</span><span class="dl">'</span><span class="p">,</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">name</span><span class="p">)</span> <span class="p">{</span>
+  <span class="k">this</span><span class="p">.</span><span class="nx">signIn</span><span class="p">({</span> <span class="nx">name</span> <span class="p">})</span>
+<span class="p">})</span>
+
+<span class="nx">When</span><span class="p">(</span><span class="dl">'</span><span class="s1">{word} activates his/her account</span><span class="dl">'</span><span class="p">,</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">name</span><span class="p">)</span> <span class="p">{</span>
+  <span class="k">this</span><span class="p">.</span><span class="nx">activateAccount</span><span class="p">({</span> <span class="nx">name</span> <span class="p">})</span>
+<span class="p">})</span>
+
+<span class="nx">Given</span><span class="p">(</span><span class="dl">'</span><span class="s1">{word} has signed up</span><span class="dl">'</span><span class="p">,</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">name</span><span class="p">)</span> <span class="p">{</span>
+  <span class="k">this</span><span class="p">.</span><span class="nx">createAccount</span><span class="p">({</span> <span class="nx">name</span> <span class="p">})</span>
+  <span class="k">this</span><span class="p">.</span><span class="nx">activateAccount</span><span class="p">({</span> <span class="nx">name</span> <span class="p">})</span>
+<span class="p">})</span>
+
+<span class="nx">When</span><span class="p">(</span><span class="dl">'</span><span class="s1">{word} (tries to )create(s) a project</span><span class="dl">'</span><span class="p">,</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">name</span><span class="p">)</span> <span class="p">{</span>
+  <span class="k">this</span><span class="p">.</span><span class="nx">createProject</span><span class="p">({</span> <span class="nx">name</span><span class="p">,</span> <span class="na">project</span><span class="p">:</span> <span class="p">{</span> <span class="na">name</span><span class="p">:</span> <span class="dl">'</span><span class="s1">a-project</span><span class="dl">'</span> <span class="p">}})</span>
+<span class="p">})</span>
+
+<span class="nx">Then</span><span class="p">(</span><span class="dl">'</span><span class="s1">{word} should see the project</span><span class="dl">'</span><span class="p">,</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">name</span><span class="p">)</span> <span class="p">{</span>
+  <span class="nx">assertThat</span><span class="p">(</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">getProjects</span><span class="p">({</span> <span class="nx">name</span> <span class="p">}),</span>
+    <span class="nx">hasItem</span><span class="p">({</span> <span class="na">name</span><span class="p">:</span> <span class="dl">'</span><span class="s1">a-project</span><span class="dl">'</span> <span class="p">})</span>
+  <span class="p">)</span>
+<span class="p">})</span>
+
+<span class="nx">Then</span><span class="p">(</span><span class="dl">'</span><span class="s1">{word} should not see any projects</span><span class="dl">'</span><span class="p">,</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">name</span><span class="p">)</span> <span class="p">{</span>
+  <span class="nx">assertThat</span><span class="p">(</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">getProjects</span><span class="p">({</span> <span class="nx">name</span> <span class="p">}),</span>
+    <span class="nx">isEmpty</span><span class="p">()</span>
+  <span class="p">)</span>
+<span class="p">})</span>
+
+<span class="nx">Then</span><span class="p">(</span><span class="dl">'</span><span class="s1">{word} should not be authenticated</span><span class="dl">'</span><span class="p">,</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">name</span><span class="p">)</span> <span class="p">{</span>
+  <span class="nx">assertThat</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">isAuthenticated</span><span class="p">({</span> <span class="nx">name</span> <span class="p">}),</span> <span class="nx">is</span><span class="p">(</span><span class="nx">not</span><span class="p">(</span><span class="kc">true</span><span class="p">)))</span>
+<span class="p">})</span>
+
+<span class="nx">Then</span><span class="p">(</span><span class="dl">'</span><span class="s1">{word} should be authenticated</span><span class="dl">'</span><span class="p">,</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">name</span><span class="p">)</span> <span class="p">{</span>
+  <span class="nx">assertThat</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">isAuthenticated</span><span class="p">({</span> <span class="nx">name</span> <span class="p">}),</span> <span class="nx">is</span><span class="p">(</span><span class="kc">true</span><span class="p">))</span>
+<span class="p">})</span>
+
+<span class="nx">Then</span><span class="p">(</span><span class="dl">'</span><span class="s1">{word} should see an error telling him/her to activate the account</span><span class="dl">'</span><span class="p">,</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">name</span><span class="p">)</span> <span class="p">{</span>
+  <span class="nx">assertThat</span><span class="p">(</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">authenticationError</span><span class="p">({</span> <span class="nx">name</span> <span class="p">}),</span>
+    <span class="nx">matchesPattern</span><span class="p">(</span><span class="sr">/activate your account/</span><span class="p">)</span>
+  <span class="p">)</span>
+<span class="p">})</span></code></pre>
+</div>
 </div>
 <div class="paragraph">
 <p>This all seems quite straightforward in our simple example, but if we&#8217;re really sensitive to them, we might notice a couple of issues that could cause concern as the codebase grows.</p>
 </div>
 <div class="paragraph">
-<p>First, we have duplication of the project name, a-project. We&#8217;ve made the sensible choice to push this detail down out of the scenarios to make them more readable (avoiding incidental details), but we&#8217;re now left with the problem of needing that information in two places in our code. One solution might be to stash the project name on the World, like this:</p>
+<p>First, we have duplication of the project name, <code>a-project</code>. We&#8217;ve made the sensible choice to push this detail down out of the scenarios to make them more readable (avoiding incidental details), but we&#8217;re now left with the problem of needing that information in two places in our code. One solution might be to stash the project name on the World, like this:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="js"><span class="nx">When</span><span class="p">(</span><span class="dl">'</span><span class="s1">{word} (tries to )create(s) a project</span><span class="dl">'</span><span class="p">,</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">name</span><span class="p">)</span> <span class="p">{</span>
+  <span class="k">this</span><span class="p">.</span><span class="nx">projectName</span> <span class="o">=</span> <span class="dl">'</span><span class="s1">a-project</span><span class="dl">'</span>
+  <span class="k">this</span><span class="p">.</span><span class="nx">createProject</span><span class="p">({</span> <span class="nx">name</span><span class="p">,</span> <span class="na">project</span><span class="p">:</span> <span class="p">{</span> <span class="na">name</span><span class="p">:</span> <span class="k">this</span><span class="p">.</span><span class="nx">projectName</span> <span class="p">}})</span>
+<span class="p">})</span>
+
+<span class="nx">Then</span><span class="p">(</span><span class="dl">'</span><span class="s1">{word} should see the project</span><span class="dl">'</span><span class="p">,</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">name</span><span class="p">)</span> <span class="p">{</span>
+  <span class="nx">assertThat</span><span class="p">(</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">getProjects</span><span class="p">({</span> <span class="nx">name</span> <span class="p">}),</span>
+    <span class="nx">hasItem</span><span class="p">({</span> <span class="na">name</span><span class="p">:</span> <span class="k">this</span><span class="p">.</span><span class="nx">projectName</span> <span class="p">})</span>
+  <span class="p">)</span>
+<span class="p">})</span></code></pre>
+</div>
 </div>
 <div class="paragraph">
 <p>If you use Cucumber-Ruby you&#8217;ve probably done this kind of thing using an instance variable. SpecFlow or Cucumber-JVM practitioners maybe have used a ScenarioContext object. Like using helper methods, this is common practice in the Cucumber community. While this will work OK for now, what we&#8217;re starting to see is that the World object is just getting more and more complicated.</p>
@@ -734,20 +825,17 @@ Here&#8217;s the feature file:</p>
 <p>It&#8217;s becoming a God object.</p>
 </div>
 <div class="paragraph">
-<p>Well-designed objects have the property of cohesion. That means the methods on that object all have a reason to be together, such as sharing the same internal state. God objects don&#8217;t have this property. They&#8217;re just a grab-bag of methods that have no reason to be on the same class other than for a lack of a better place to put them.</p>
+<p>Well-designed objects have the property of <em>cohesion</em>. That means the methods on that object all have a reason to be together, such as sharing the same internal state. God objects don&#8217;t have this property. They&#8217;re just a grab-bag of methods, properties and state that have no reason to be on the same class other than for a lack of a better place to put them.</p>
 </div>
 <div class="paragraph">
 <p>Another niggling concern is that we&#8217;ve broken our idiom of having one-liner step definitions. We&#8217;re introduced the concept of "signing up" which rolls together the two granular actions of creating an account and then activating it.</p>
 </div>
 <div class="paragraph">
-<p>At this stage, a two-line step definition is not a big deal, but it&#8217;s the wrong direction of travel. As we build up a more rich and interesting system we&#8217;ll have more and more of these abstractions. We could push this down into a signUp helper method on the world, but this doesn&#8217;t actually tackle the complexity, it just pushes it away somewhere we can&#8217;t see it so easily.</p>
+<p>At this stage, a two-line step definition is not a big deal, but it&#8217;s the wrong direction of travel. As we build up a more rich and interesting system we&#8217;ll have more and more of these abstractions. We could push this down into a <code>signUp</code> helper method on the world, but this doesn&#8217;t actually tackle the complexity, it just pushes it away somewhere we can&#8217;t see it so easily.</p>
 </div>
 </div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="_cracks_are_appearing">Cracks are appearing</h2>
-<div class="sectionbody">
+<div class="sect2">
+<h3 id="_cracks_are_appearing">Cracks are appearing</h3>
 <div class="paragraph">
 <p>Let&#8217;s take a step back for a minute and review what we do and don&#8217;t like about this code so far.</p>
 </div>
@@ -784,10 +872,8 @@ Here&#8217;s the feature file:</p>
 <p>At the moment, in this tiny example codebase, these concerns are only hairline cracks; but we know what happens as our codebase evolves: small problems turn into big problems and, before you know it, you&#8217;re stuck in a codebase you hate.</p>
 </div>
 </div>
-</div>
-<div class="sect1">
-<h2 id="_what_about_page_objects">What about Page Objects?</h2>
-<div class="sectionbody">
+<div class="sect2">
+<h3 id="_what_about_page_objects">What about Page Objects?</h3>
 <div class="paragraph">
 <p>What if we were to use page objects? Could they help us?</p>
 </div>
@@ -801,14 +887,15 @@ Here&#8217;s the feature file:</p>
 <p>So now we have a sense of some of the problems with the typical approaches to organising acceptance test automation code.</p>
 </div>
 <div class="paragraph">
-<p>In the next post we&#8217;ll have a look at what Screenplay could offer us to solve these problems, and start using it in our example application.</p>
+<p>Next we&#8217;ll have a look at what Screenplay could offer us to solve these problems, and start using it in our example application.</p>
+</div>
 </div>
 </div>
 </div>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2019-11-29 09:11:55 UTC
+Last updated 2019-12-16 12:18:03 UTC
 </div>
 </div>
 <style>

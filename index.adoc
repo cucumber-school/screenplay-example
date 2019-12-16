@@ -41,9 +41,9 @@ If I've done my job right then, by the end of this series, you'll see that it's 
 
 == The fundamentals of Screenplay
 
-The fundamental element of the Screenplay pattern is an Interaction. Instead of having the code that interacts with our app littered around in helper methods or page objects, we separate and encapsulate each tiny granule of work as an individual object, each with the same interface: a single method that allows us to run that action against our app.
+The fundamental element of the Screenplay pattern is an _Interaction_. Instead of having the code that interacts with our app littered around in helper methods or page objects, we separate and encapsulate each tiny granule of work as an individual object, each with the same interface: a single method that allows us to run that action against our app.
 
-For example, you might have an Interaction like InsertInto which knows how to insert a record into an SQL database table. Or you might have an Interaction like WriteTo that can write to a text file on disk. Or an Interaction like FillIn which can put text into a field in a browser. Or an Interaction like PostJson that sends a payload to an API endpoint.
+For example, you might have an Interaction like `InsertInto` which knows how to insert a record into an SQL database table. Or you might have an Interaction like `WriteTo` that can write to a text file on disk. Or an Interaction like `FillIn` which can put text into a field in a browser. Or an Interaction like `PostJson` that sends a payload to an API endpoint.
 
 Then, we express the behaviour we want in our tests by creating lists of these Interaction objects that we want to execute, like:
 
@@ -148,25 +148,49 @@ We won't dig any deeper into our automation stack right now. Let's just trust th
 === A new requirement
 
 As they tend to do from time to time, our product owner would like this app of ours to do something new. She has an idea that our app will have projects that users with existing accounts can create. I don't know where she gets these wild ideas.
+
 Here's the feature file:
+[source,gherkin]
+----
+include::code/01-add-create-project-feature/features/create_project.feature[]
+----
 
 We've introduced a handful of new steps here. Let's look at how these are defined:
+[source,js]
+----
+include::code/01-add-create-project-feature/features/step_definitions/steps.js[]
+----
 
 This all seems quite straightforward in our simple example, but if we're really sensitive to them, we might notice a couple of issues that could cause concern as the codebase grows.
 
-First, we have duplication of the project name, a-project. We've made the sensible choice to push this detail down out of the scenarios to make them more readable (avoiding incidental details), but we're now left with the problem of needing that information in two places in our code. One solution might be to stash the project name on the World, like this:
+First, we have duplication of the project name, `a-project`. We've made the sensible choice to push this detail down out of the scenarios to make them more readable (avoiding incidental details), but we're now left with the problem of needing that information in two places in our code. One solution might be to stash the project name on the World, like this:
+
+[source,js]
+----
+When('{word} (tries to )create(s) a project', function (name) {
+  this.projectName = 'a-project'
+  this.createProject({ name, project: { name: this.projectName }})
+})
+
+Then('{word} should see the project', function (name) {
+  assertThat(
+    this.getProjects({ name }),
+    hasItem({ name: this.projectName })
+  )
+})
+----
 
 If you use Cucumber-Ruby you've probably done this kind of thing using an instance variable. SpecFlow or Cucumber-JVM practitioners maybe have used a ScenarioContext object. Like using helper methods, this is common practice in the Cucumber community. While this will work OK for now, what we're starting to see is that the World object is just getting more and more complicated.
 
 It's becoming a God object.
 
-Well-designed objects have the property of cohesion. That means the methods on that object all have a reason to be together, such as sharing the same internal state. God objects don't have this property. They're just a grab-bag of methods that have no reason to be on the same class other than for a lack of a better place to put them.
+Well-designed objects have the property of _cohesion_. That means the methods on that object all have a reason to be together, such as sharing the same internal state. God objects don't have this property. They're just a grab-bag of methods, properties and state that have no reason to be on the same class other than for a lack of a better place to put them.
 
 Another niggling concern is that we've broken our idiom of having one-liner step definitions. We're introduced the concept of "signing up" which rolls together the two granular actions of creating an account and then activating it.
 
-At this stage, a two-line step definition is not a big deal, but it's the wrong direction of travel. As we build up a more rich and interesting system we'll have more and more of these abstractions. We could push this down into a signUp helper method on the world, but this doesn't actually tackle the complexity, it just pushes it away somewhere we can't see it so easily.
+At this stage, a two-line step definition is not a big deal, but it's the wrong direction of travel. As we build up a more rich and interesting system we'll have more and more of these abstractions. We could push this down into a `signUp` helper method on the world, but this doesn't actually tackle the complexity, it just pushes it away somewhere we can't see it so easily.
 
-== Cracks are appearing
+=== Cracks are appearing
 
 Let's take a step back for a minute and review what we do and don't like about this code so far.
 
@@ -183,7 +207,7 @@ But we're concerned that:
 
 At the moment, in this tiny example codebase, these concerns are only hairline cracks; but we know what happens as our codebase evolves: small problems turn into big problems and, before you know it, you're stuck in a codebase you hate.
 
-== What about Page Objects?
+=== What about Page Objects?
 
 What if we were to use page objects? Could they help us?
 
@@ -193,4 +217,4 @@ A more insidious problem is that page objects are based around the UI. This mean
 
 So now we have a sense of some of the problems with the typical approaches to organising acceptance test automation code.
 
-In the next post we'll have a look at what Screenplay could offer us to solve these problems, and start using it in our example application.
+Next we'll have a look at what Screenplay could offer us to solve these problems, and start using it in our example application.
