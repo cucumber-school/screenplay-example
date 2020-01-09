@@ -463,6 +463,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <li><a href="#_what_about_page_objects">What about Page Objects?</a></li>
 </ul>
 </li>
+<li><a href="#_refactoring_to_screenplay">Refactoring to Screenplay</a></li>
 </ul>
 </div>
 </div>
@@ -890,10 +891,49 @@ This pattern is a way out of that.</p>
 </div>
 </div>
 </div>
+<div class="sect1">
+<h2 id="_refactoring_to_screenplay">Refactoring to Screenplay</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>When refactoring to Screenplay, I&#8217;ve found it&#8217;s best to start with the smallest elements of behaviour first. Let&#8217;s pick the <code>createAccount</code> helper method:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="javascript"><span class="kd">class</span> <span class="nx">DomainDriver</span> <span class="p">{</span>
+  <span class="nx">createAccount</span><span class="p">({</span> <span class="nx">name</span> <span class="p">})</span> <span class="p">{</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">app</span><span class="p">.</span><span class="nx">accounts</span><span class="p">[</span><span class="nx">name</span><span class="p">]</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Account</span><span class="p">({</span> <span class="nx">name</span> <span class="p">})</span>
+  <span class="p">}</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>We call this method twice from our steps. Let&#8217;s inline the first instance so that&#8230;&#8203;</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="javascript"><span class="nx">Given</span><span class="p">(</span><span class="dl">'</span><span class="s1">{word} has created an account</span><span class="dl">'</span><span class="p">,</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">name</span><span class="p">)</span> <span class="p">{</span>
+  <span class="k">this</span><span class="p">.</span><span class="nx">createAccount</span><span class="p">({</span> <span class="nx">name</span> <span class="p">})</span>
+<span class="p">})</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>becomes&#8230;&#8203;</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="javascript"><span class="nx">Given</span><span class="p">(</span><span class="dl">'</span><span class="s1">{word} has created an account</span><span class="dl">'</span><span class="p">,</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">name</span><span class="p">)</span> <span class="p">{</span>
+  <span class="k">this</span><span class="p">.</span><span class="nx">app</span><span class="p">.</span><span class="nx">accounts</span><span class="p">[</span><span class="nx">name</span><span class="p">]</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Account</span><span class="p">({</span> <span class="nx">name</span> <span class="p">})</span>
+<span class="p">})</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Let&#8217;s put this code into a function which takes the <code>app</code> it will use to fetch the accounts, and the <code>name</code> of the actor. This function will be our first interaction:</p>
+</div>
+</div>
+</div>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2020-01-09 22:40:46 UTC
+Last updated 2020-01-09 22:48:39 UTC
 </div>
 </div>
 <style>

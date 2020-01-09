@@ -1,0 +1,28 @@
+
+== Refactoring to Screenplay
+
+When refactoring to Screenplay, I've found it's best to start with the smallest elements of behaviour first. Let's pick the `createAccount` helper method:
+
+[source,javascript]
+----
+include::../code/02-refactor-inline-helper/features/support/world.js[lines=8..11]
+----
+
+We call this method twice from our steps. Let's inline the first instance so that...
+
+[source,javascript]
+----
+include::../code/01-add-create-project-feature/features/step_definitions/steps.js[lines=4..6]
+----
+
+becomes...
+
+[source,javascript]
+----
+include::../code/02-refactor-inline-helper/features/step_definitions/steps.js[lines=5..7]
+----
+
+Let's put this code into a function which takes the `app` it will use to fetch the accounts, and the `name` of the actor. This function will be our first interaction:
+
+
+
