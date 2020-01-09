@@ -5,7 +5,7 @@ Matt Wynne <matt@cucumber.io>
 
 Once you've decided to invest in test automation, sooner or later you'll begin to realise that you need to care about the maintainability of that test automation code just as much as you do about the implementation code itself.
 
-For acceptance tests this problem is particularly acute: driving the application from its outside edges can involve connecting to APIs, databases, web UIs etc., and this code can quickly get out of hand. Having tried several different approaches myself over the years, I've come to believe that the Screenplay pattern is the best technique we have today.
+For acceptance tests this problem is particularly acute: driving the application from its outside edges can involve connecting to APIs, databases, web UIs etc., and this code can quickly get out of hand. Having tried several different approaches myself over the years, I've come to believe that the Screenplay pattern is the best technique we have today for keeping this code lean and fun to work with.
 
 But it doesn't get the attention it deserves.
 
@@ -32,7 +32,7 @@ So let's be totally clear. The Screenplay pattern does not have anything to say 
 === Myth #2: Screenplay is over-complicated
 I'll admit that this was my reaction at first. Even though I had a strong feeling there was something useful in this pattern, I found all the early examples I read to be quite hard to fathom, with a lot of new concepts to understand. It all made me feel a bit stupid.
 
-Having got my head around it now, I can tell you for sure that there's a super-simple core idea here. Essentially, Screenplay is just the command pattern applied in the specific context of organising test automation code.
+Having got my head around it now, I can tell you for sure that there's a super-simple core idea here. Essentially, Screenplay is just the [command pattern](https://en.wikipedia.org/wiki/Command_pattern) applied in the specific context of organising test automation code.
 
 In fact, I bet that if you've worked on a test automation suite of any reasonable size, you'll know exactly what over-complicated feels like. Massive classes heaving with too many methods. Awkward hierarchies of objects to try and avoid duplication. A maze of different files.
 This pattern is a way out of that.
@@ -51,10 +51,6 @@ Then, we express the behaviour we want in our tests by creating lists of these I
 ----
 attemptTo(
   new InsertInto({
-    table: "Companies", 
-    data: { name: "ACME" } 
-  }),
-  new InsertInto({
     table: "Accounts",
     data: { name: "Dave", password: "secret", company: "ACME" }
   }),
@@ -70,12 +66,13 @@ attemptTo(
 )
 ----
 
+This set of interactions creates a record in a database to represent a user called `Dave`, then fills out a web form to log him in.
+
 We can create factory DSLs to make this code read better:
 
 [source,javascript]
 ----
 attemptTo(
-  InsertInto.table("Companies").data({ name: "ACME" }),
   InsertInto.table("Accounts").data({ name: "Dave", password: "secret", company: "ACME" }),
   FillIn.field("Username").with("Dave"),
   FillIn.field("Password").with("secret"),

@@ -473,7 +473,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <p>Once you&#8217;ve decided to invest in test automation, sooner or later you&#8217;ll begin to realise that you need to care about the maintainability of that test automation code just as much as you do about the implementation code itself.</p>
 </div>
 <div class="paragraph">
-<p>For acceptance tests this problem is particularly acute: driving the application from its outside edges can involve connecting to APIs, databases, web UIs etc., and this code can quickly get out of hand. Having tried several different approaches myself over the years, I&#8217;ve come to believe that the Screenplay pattern is the best technique we have today.</p>
+<p>For acceptance tests this problem is particularly acute: driving the application from its outside edges can involve connecting to APIs, databases, web UIs etc., and this code can quickly get out of hand. Having tried several different approaches myself over the years, I&#8217;ve come to believe that the Screenplay pattern is the best technique we have today for keeping this code lean and fun to work with.</p>
 </div>
 <div class="paragraph">
 <p>But it doesn&#8217;t get the attention it deserves.</p>
@@ -516,7 +516,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <p>I&#8217;ll admit that this was my reaction at first. Even though I had a strong feeling there was something useful in this pattern, I found all the early examples I read to be quite hard to fathom, with a lot of new concepts to understand. It all made me feel a bit stupid.</p>
 </div>
 <div class="paragraph">
-<p>Having got my head around it now, I can tell you for sure that there&#8217;s a super-simple core idea here. Essentially, Screenplay is just the command pattern applied in the specific context of organising test automation code.</p>
+<p>Having got my head around it now, I can tell you for sure that there&#8217;s a super-simple core idea here. Essentially, Screenplay is just the [command pattern](<a href="https://en.wikipedia.org/wiki/Command_pattern" class="bare">https://en.wikipedia.org/wiki/Command_pattern</a>) applied in the specific context of organising test automation code.</p>
 </div>
 <div class="paragraph">
 <p>In fact, I bet that if you&#8217;ve worked on a test automation suite of any reasonable size, you&#8217;ll know exactly what over-complicated feels like. Massive classes heaving with too many methods. Awkward hierarchies of objects to try and avoid duplication. A maze of different files.
@@ -544,10 +544,6 @@ This pattern is a way out of that.</p>
 <div class="content">
 <pre class="rouge highlight"><code data-lang="javascript"><span class="nx">attemptTo</span><span class="p">(</span>
   <span class="k">new</span> <span class="nx">InsertInto</span><span class="p">({</span>
-    <span class="na">table</span><span class="p">:</span> <span class="dl">"</span><span class="s2">Companies</span><span class="dl">"</span><span class="p">,</span>
-    <span class="na">data</span><span class="p">:</span> <span class="p">{</span> <span class="na">name</span><span class="p">:</span> <span class="dl">"</span><span class="s2">ACME</span><span class="dl">"</span> <span class="p">}</span>
-  <span class="p">}),</span>
-  <span class="k">new</span> <span class="nx">InsertInto</span><span class="p">({</span>
     <span class="na">table</span><span class="p">:</span> <span class="dl">"</span><span class="s2">Accounts</span><span class="dl">"</span><span class="p">,</span>
     <span class="na">data</span><span class="p">:</span> <span class="p">{</span> <span class="na">name</span><span class="p">:</span> <span class="dl">"</span><span class="s2">Dave</span><span class="dl">"</span><span class="p">,</span> <span class="na">password</span><span class="p">:</span> <span class="dl">"</span><span class="s2">secret</span><span class="dl">"</span><span class="p">,</span> <span class="na">company</span><span class="p">:</span> <span class="dl">"</span><span class="s2">ACME</span><span class="dl">"</span> <span class="p">}</span>
   <span class="p">}),</span>
@@ -564,12 +560,14 @@ This pattern is a way out of that.</p>
 </div>
 </div>
 <div class="paragraph">
+<p>This set of interactions creates a record in a database to represent a user called <code>Dave</code>, then fills out a web form to log him in.</p>
+</div>
+<div class="paragraph">
 <p>We can create factory DSLs to make this code read better:</p>
 </div>
 <div class="listingblock">
 <div class="content">
 <pre class="rouge highlight"><code data-lang="javascript"><span class="nx">attemptTo</span><span class="p">(</span>
-  <span class="nx">InsertInto</span><span class="p">.</span><span class="nx">table</span><span class="p">(</span><span class="dl">"</span><span class="s2">Companies</span><span class="dl">"</span><span class="p">).</span><span class="nx">data</span><span class="p">({</span> <span class="na">name</span><span class="p">:</span> <span class="dl">"</span><span class="s2">ACME</span><span class="dl">"</span> <span class="p">}),</span>
   <span class="nx">InsertInto</span><span class="p">.</span><span class="nx">table</span><span class="p">(</span><span class="dl">"</span><span class="s2">Accounts</span><span class="dl">"</span><span class="p">).</span><span class="nx">data</span><span class="p">({</span> <span class="na">name</span><span class="p">:</span> <span class="dl">"</span><span class="s2">Dave</span><span class="dl">"</span><span class="p">,</span> <span class="na">password</span><span class="p">:</span> <span class="dl">"</span><span class="s2">secret</span><span class="dl">"</span><span class="p">,</span> <span class="na">company</span><span class="p">:</span> <span class="dl">"</span><span class="s2">ACME</span><span class="dl">"</span> <span class="p">}),</span>
   <span class="nx">FillIn</span><span class="p">.</span><span class="nx">field</span><span class="p">(</span><span class="dl">"</span><span class="s2">Username</span><span class="dl">"</span><span class="p">).</span><span class="kd">with</span><span class="p">(</span><span class="dl">"</span><span class="s2">Dave</span><span class="dl">"</span><span class="p">),</span>
   <span class="nx">FillIn</span><span class="p">.</span><span class="nx">field</span><span class="p">(</span><span class="dl">"</span><span class="s2">Password</span><span class="dl">"</span><span class="p">).</span><span class="kd">with</span><span class="p">(</span><span class="dl">"</span><span class="s2">secret</span><span class="dl">"</span><span class="p">),</span>
@@ -895,7 +893,7 @@ This pattern is a way out of that.</p>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2019-12-16 12:18:03 UTC
+Last updated 2020-01-09 22:40:46 UTC
 </div>
 </div>
 <style>
