@@ -463,7 +463,12 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <li><a href="#_what_about_page_objects">What about Page Objects?</a></li>
 </ul>
 </li>
-<li><a href="#_refactoring_to_screenplay">Refactoring to Screenplay</a></li>
+<li><a href="#_refactoring_to_screenplay">Refactoring to Screenplay</a>
+<ul class="sectlevel2">
+<li><a href="#_extract_interaction">Extract interaction</a></li>
+<li><a href="#_naming_our_interaction">Naming our interaction</a></li>
+</ul>
+</li>
 </ul>
 </div>
 </div>
@@ -905,7 +910,7 @@ This pattern is a way out of that.</p>
 </div>
 </div>
 <div class="paragraph">
-<p>We call this method twice from our steps. We&#8217;ll work with the first instance to turn this into a screenplay <em>interaction</em> and call it, then we&#8217;ll tidy up/</p>
+<p>We call this method twice from our steps. We&#8217;ll work with the first instance to turn this into a screenplay <em>interaction</em> and call it, then we&#8217;ll tidy up.</p>
 </div>
 <div class="paragraph">
 <p>Let&#8217;s inline the first instance so that&#8230;&#8203;</p>
@@ -928,14 +933,56 @@ This pattern is a way out of that.</p>
 </div>
 </div>
 <div class="paragraph">
-<p>Let&#8217;s put this code into a function which takes the <code>app</code> it will use to fetch the accounts, and the <code>name</code> of the actor. This function will be our first interaction:</p>
+<p>Now we have the code back out in the open, we can re-shape it into a screenplay style.</p>
+</div>
+<div class="sect2">
+<h3 id="_extract_interaction">Extract interaction</h3>
+<div class="paragraph">
+<p>We&#8217;ll put this code into a function expression which will become our first interaction. The interaction takes the dependencies it will need to do it&#8217;s work, and any additional data. In this case, it needs a reference to the <code>app</code> it will use to fetch the accounts, and the <code>name</code> of the actor.</p>
+</div>
+<div class="paragraph">
+<p>To complete the refactoring, we call the function, passing the name from the step definition and destructuring <code>this</code> to give us the <code>app</code> parameter.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="javascript"><span class="nx">Given</span><span class="p">(</span><span class="dl">'</span><span class="s1">{word} has created an account</span><span class="dl">'</span><span class="p">,</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">name</span><span class="p">)</span> <span class="p">{</span>
+  <span class="kd">const</span> <span class="nx">interaction</span> <span class="o">=</span> <span class="p">({</span> <span class="nx">name</span><span class="p">,</span> <span class="nx">app</span> <span class="p">})</span> <span class="o">=&gt;</span> <span class="nx">app</span><span class="p">.</span><span class="nx">accounts</span><span class="p">[</span><span class="nx">name</span><span class="p">]</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Account</span><span class="p">({</span> <span class="nx">name</span> <span class="p">})</span>
+  <span class="nx">interaction</span><span class="p">({</span> <span class="nx">name</span><span class="p">,</span> <span class="p">...</span><span class="k">this</span> <span class="p">})</span>
+<span class="p">})</span></code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_naming_our_interaction">Naming our interaction</h3>
+<div class="paragraph">
+<p>An idiom that screenplay&#8217;s original authors used was to adopt a <a href="https://www.martinfowler.com/bliki/FluentInterface.html">fluent interface</a> for creating interactions. Let&#8217;s rename our interaction in this style, calling it <code>CreateAccount.forThemselves</code>. We do this by creating a plain JavaScript object, <code>CreateAccount</code>, with a property <code>forThemselves</code> that returns the interaction function expression:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="javascript"><span class="kd">const</span> <span class="nx">CreateAccount</span> <span class="o">=</span> <span class="p">{</span>
+  <span class="na">forThemselves</span><span class="p">:</span>
+    <span class="p">({</span> <span class="nx">name</span><span class="p">,</span> <span class="nx">app</span> <span class="p">})</span> <span class="o">=&gt;</span> <span class="nx">app</span><span class="p">.</span><span class="nx">accounts</span><span class="p">[</span><span class="nx">name</span><span class="p">]</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Account</span><span class="p">({</span> <span class="nx">name</span> <span class="p">})</span>
+<span class="p">}</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Now we can use that in our step definition.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="javascript"><span class="nx">Given</span><span class="p">(</span><span class="dl">'</span><span class="s1">{word} has created an account</span><span class="dl">'</span><span class="p">,</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">name</span><span class="p">)</span> <span class="p">{</span>
+  <span class="kd">const</span> <span class="nx">interaction</span> <span class="o">=</span> <span class="nx">CreateAccount</span><span class="p">.</span><span class="nx">forThemselves</span>
+  <span class="nx">interaction</span><span class="p">({</span> <span class="nx">name</span><span class="p">,</span> <span class="p">...</span><span class="k">this</span> <span class="p">})</span>
+<span class="p">})</span></code></pre>
+</div>
+</div>
 </div>
 </div>
 </div>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2020-02-27 15:15:12 UTC
+Last updated 2020-02-27 15:31:10 UTC
 </div>
 </div>
 <style>

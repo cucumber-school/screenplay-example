@@ -8,7 +8,7 @@ When refactoring to Screenplay, I've found it's best to start with the smallest 
 include::../code/04-refactor-inline-helper/features/support/world.js[lines=9..11]
 ----
 
-We call this method twice from our steps. We'll work with the first instance to turn this into a screenplay _interaction_ and call it, then we'll tidy up/
+We call this method twice from our steps. We'll work with the first instance to turn this into a screenplay _interaction_ and call it, then we'll tidy up.
 
 Let's inline the first instance so that...
 
@@ -24,7 +24,40 @@ becomes...
 include::../code/04-refactor-inline-helper/features/step_definitions/steps.js[lines=5..7]
 ----
 
-We'll put this code into a function which will become our first interaction. The interaction takes the dependencies it will need to do it's work, and any additional data. In this case, it needs a reference to the `app` it will use to fetch the accounts, and the `name` of the actor.
+Now we have the code back out in the open, we can re-shape it into a screenplay style.
+
+### Extract interaction
+
+We'll put this code into a function expression which will become our first interaction. The interaction takes the dependencies it will need to do it's work, and any additional data. In this case, it needs a reference to the `app` it will use to fetch the accounts, and the `name` of the actor.
+
+To complete the refactoring, we call the function, passing the name from the step definition and destructuring `this` to give us the `app` parameter.
+
+[source,javascript]
+----
+include::../code/05-extract-interaction/features/step_definitions/steps.js[lines=5..8]
+----
+
+### Naming our interaction
+
+An idiom that screenplay's original authors used was to adopt a https://www.martinfowler.com/bliki/FluentInterface.html[fluent interface] for creating interactions. Let's rename our interaction in this style, calling it `CreateAccount.forThemselves`. We do this by creating a plain JavaScript object, `CreateAccount`, with a property `forThemselves` that returns the interaction function expression:
+
+[source,javascript]
+----
+include::../code/06-give-interaction-a-meaningful-name/features/step_definitions/steps.js[lines=5..8]
+----
+
+Now we can use that in our step definition.
+
+[source,javascript]
+----
+include::../code/06-give-interaction-a-meaningful-name/features/step_definitions/steps.js[lines=10..13]
+----
+
+### Actor perform interactions
+
+Back in the first part of this series, we talk about the metaphor for screenplay being about actors on a stage. Instead of calling our interaction directly from our step definition, we're going to create an `Actor` that we'll use to do that for us.
+
+In the metaphor, the actor is said to have _abilities_: the things it needs to be able to perform the actions it's given. In practice, these are the dependencies that the interaction functions will expect to be passed, like a `browser` or a `database` connection. In our simple example, we just need a reference to the `app`. It's also useful for the Actor to know its own name, so we'll take these two properties when constructing our `Actor`:
 
 
 
