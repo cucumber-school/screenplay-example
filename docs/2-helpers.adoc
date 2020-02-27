@@ -12,7 +12,7 @@ Sign-up is a two-step process, as described in this feature file:
 
 [source,gherkin]
 ----
-include::../code/00-add-sign-up-feature/features/sign_up.feature[]
+include::../code/02-add-sign-up-feature/features/sign_up.feature[]
 ----
 
 So far so good. We have one happy path scenario for Tanya creating then activating her account, and being able to sign in. We have another that illustrates what happens if hapless Bob tries to sign in before he's got around to activating the account.
@@ -21,7 +21,7 @@ Now let's drop down a layer and have a look at the step definitions we've writte
 
 [source,js]
 ----
-include::../code/00-add-sign-up-feature/features/step_definitions/steps.js[]
+include::../code/02-add-sign-up-feature/features/step_definitions/steps.js[]
 ----
 
 There's a couple of things going on here, so let's pick them apart.
