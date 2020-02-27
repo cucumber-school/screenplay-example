@@ -27,6 +27,14 @@ const CreateAccount = {
     ({ name, app }) => app.accounts[name] = new Account({ name })
 }
 
+const Activate = {
+  theirAccount:
+    ({ name, app }) => {
+      app.getAccount(name).activate()
+      app.authenticate({ name })
+    }
+}
+
 Given('{actor} has created an account', 
   actor => actor.attemptsTo(CreateAccount.forThemselves)
 )
@@ -39,9 +47,9 @@ When('{word} activates his/her account', function (name) {
   this.activateAccount({ name })
 })
 
-Given('{word} has signed up', function (name) {
-  this.createAccount({ name })
-  this.activateAccount({ name })
+Given('{actor} has signed up', function (actor) {
+  actor.attemptsTo(CreateAccount.forThemselves)
+  actor.attemptsTo(Activate.theirAccount)
 })
 
 When('{word} (tries to )create(s) a project', function (name) {
