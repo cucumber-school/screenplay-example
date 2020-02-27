@@ -2,6 +2,7 @@ require 'tmpdir'
 namespace :docs do
   task :code do
     pwd = Dir.pwd
+    puts "Working in #{pwd}"
     current_branch = `git rev-parse --abbrev-ref HEAD`
     sh 'rm -rf code'
     sh 'mkdir code'
