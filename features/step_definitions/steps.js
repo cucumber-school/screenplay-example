@@ -4,12 +4,15 @@ const { Account } = require('../../lib/app')
 
 class Actor {
   constructor(abilities) {
-    this.abilities = abilities
+    this.abilities = {
+      ...abilities,
+      attemptsTo: this.attemptsTo.bind(this)
+    }
   }
 
-  attemptsTo(...interactions) {
-    for(const interaction of interactions)
-      interaction(this.abilities)
+  attemptsTo(...actions) {
+    for(const action of actions)
+      action(this.abilities)
   }
 }
 
@@ -36,6 +39,12 @@ const Activate = {
     }
 }
 
+const signUp =
+  ({ attemptsTo }) => attemptsTo(
+    CreateAccount.forThemselves,
+    Activate.theirAccount
+  )
+
 Given('{actor} has created an account', 
   actor => actor.attemptsTo(CreateAccount.forThemselves)
 )
@@ -49,10 +58,7 @@ When('{word} activates his/her account', function (name) {
 })
 
 Given('{actor} has signed up', 
-  actor => actor.attemptsTo(
-    CreateAccount.forThemselves,
-    Activate.theirAccount
-  )
+  actor => actor.attemptsTo(signUp)
 )
 
 When('{word} (tries to )create(s) a project', function (name) {
