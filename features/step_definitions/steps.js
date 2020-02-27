@@ -53,9 +53,9 @@ When('{word} tries to sign in', function (name) {
   this.signIn({ name })
 })
 
-When('{word} activates his/her account', function (name) {
-  this.activateAccount({ name })
-})
+When('{actor} activates his/her account',
+  actor => actor.attemptsTo(Activate.theirAccount)
+)
 
 Given('{actor} has signed up', 
   actor => actor.attemptsTo(signUp)
