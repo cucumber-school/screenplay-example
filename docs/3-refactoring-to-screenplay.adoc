@@ -5,7 +5,7 @@ When refactoring to Screenplay, I've found it's best to start with the smallest 
 
 [source,javascript]
 ----
-include::../code/04-refactor-inline-helper/features/support/world.js[lines=9..11]
+include::../code/03-refactor-inline-helper/features/support/world.js[lines=9..11]
 ----
 
 We call this method twice from our steps. We'll work with the first instance to turn this into a screenplay _interaction_ and call it, then we'll tidy up.
@@ -14,14 +14,14 @@ Let's inline the first instance so that...
 
 [source,javascript]
 ----
-include::../code/03-add-create-project-feature/features/step_definitions/steps.js[lines=4..6]
+include::../code/02-add-create-project-feature/features/step_definitions/steps.js[lines=4..6]
 ----
 
 becomes...
 
 [source,javascript]
 ----
-include::../code/04-refactor-inline-helper/features/step_definitions/steps.js[lines=5..7]
+include::../code/03-refactor-inline-helper/features/step_definitions/steps.js[lines=5..7]
 ----
 
 Now we have the code back out in the open, we can re-shape it into a screenplay style.
@@ -34,30 +34,81 @@ To complete the refactoring, we call the function, passing the name from the ste
 
 [source,javascript]
 ----
-include::../code/05-extract-interaction/features/step_definitions/steps.js[lines=5..8]
+include::../code/04-extract-interaction/features/step_definitions/steps.js[lines=5..8]
 ----
 
-### Naming our interaction
+=== Naming our interaction
 
 An idiom that screenplay's original authors used was to adopt a https://www.martinfowler.com/bliki/FluentInterface.html[fluent interface] for creating interactions. Let's rename our interaction in this style, calling it `CreateAccount.forThemselves`. We do this by creating a plain JavaScript object, `CreateAccount`, with a property `forThemselves` that returns the interaction function expression:
 
 [source,javascript]
 ----
-include::../code/06-give-interaction-a-meaningful-name/features/step_definitions/steps.js[lines=5..8]
+include::../code/05-give-interaction-a-meaningful-name/features/step_definitions/steps.js[lines=5..8]
 ----
 
 Now we can use that in our step definition.
 
 [source,javascript]
 ----
-include::../code/06-give-interaction-a-meaningful-name/features/step_definitions/steps.js[lines=10..13]
+include::../code/05-give-interaction-a-meaningful-name/features/step_definitions/steps.js[lines=10..13]
 ----
 
-### Actor perform interactions
+=== Actors perform interactions using abilities
 
-Back in the first part of this series, we talk about the metaphor for screenplay being about actors on a stage. Instead of calling our interaction directly from our step definition, we're going to create an `Actor` that we'll use to do that for us.
+Back in the first part of this series, we talked about the metaphor for screenplay being actors on a stage. Instead of calling our interaction directly from our step definition, we're going to create an `Actor` that we'll use to do that for us.
 
 In the metaphor, the actor is said to have _abilities_: the things it needs to be able to perform the actions it's given. In practice, these are the dependencies that the interaction functions will expect to be passed, like a `browser` or a `database` connection. In our simple example, we just need a reference to the `app`. It's also useful for the Actor to know its own name, so we'll take these two properties when constructing our `Actor`:
 
+[source,javascript]
+----
+include::../code/06-create-an-actor/features/step_definitions/steps.js[lines=10..14]
+----
 
+Now, the actor has everything it needs to be able to attempt to perform an action:
 
+[source,javascript]
+----
+include::../code/06-create-an-actor/features/step_definitions/steps.js[lines=16..19]
+----
+
+Perfect.
+
+Now we can use the shiny new `Actor` in our step deifnition:
+
+[source,javascript]
+----
+include::../code/06-create-an-actor/features/step_definitions/steps.js[lines=21..25]
+----
+
+=== Using a custom parameter type
+
+Since the screenplay pattern centres around these Actors, we don't want to have to keep constructing them in our step definitions. Fortunately, Cucumber gives us https://cucumber.io/docs/cucumber/cucumber-expressions/#custom-parameter-types[custom parameter types] that allows us to transform the text `Sue`, `Tanya` or `Bob` into an instance of `Actor` that represents them.
+
+Here's how we do that:
+
+[source,javascript]
+----
+include::../code/07-factor-out-actor-parameter-type/features/step_definitions/steps.js[lines=21..29]
+----
+
+Now we can ask for an instance of `Actor` in our step definition:
+
+[source,javascript]
+----
+include::../code/07-factor-out-actor-parameter-type/features/step_definitions/steps.js[lines=31..34]
+----
+
+In fact, [since we're no longer using `this`](https://github.com/cucumber/cucumber-js/issues/467#issuecomment-172933376), we can now use an arrow function for our step definition:
+
+[source,javascript]
+----
+include::../code/08-use-arrow-function/features/step_definitions/steps.js[lines=31..34]
+----
+
+Hopefully you can see things starting to fall into place. We're delegating the work in our step definitions off to _actors_ and _interactions_. The _actors_ have _abilities_ that enable them to perform the interactions, but they're completely decoupled from those interactions themselves. Each _interaction_ is a separate JavaScript function that takes the _abilities_ and does something to the system.
+
+This decoupling enables this pattern to scale really well. We can add new interactions easily, without creating extra dependencies or bloated helper classes.
+
+All of this leaves us with step defintions that are much more readable than before, with a clear mapping from the plain English in our Gherkin steps to the code that carries out the step.
+
+The real beauty of the actor-interactions model is that interactions are _composable_: we can build up more interesting actions out of fine-grained interactions, like putting lego pieces together. That's what we'll look at next.

@@ -467,6 +467,8 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <ul class="sectlevel2">
 <li><a href="#_extract_interaction">Extract interaction</a></li>
 <li><a href="#_naming_our_interaction">Naming our interaction</a></li>
+<li><a href="#_actors_perform_interactions_using_abilities">Actors perform interactions using abilities</a></li>
+<li><a href="#_using_a_custom_parameter_type">Using a custom parameter type</a></li>
 </ul>
 </li>
 </ul>
@@ -977,12 +979,97 @@ This pattern is a way out of that.</p>
 </div>
 </div>
 </div>
+<div class="sect2">
+<h3 id="_actors_perform_interactions_using_abilities">Actors perform interactions using abilities</h3>
+<div class="paragraph">
+<p>Back in the first part of this series, we talked about the metaphor for screenplay being actors on a stage. Instead of calling our interaction directly from our step definition, we&#8217;re going to create an <code>Actor</code> that we&#8217;ll use to do that for us.</p>
+</div>
+<div class="paragraph">
+<p>In the metaphor, the actor is said to have <em>abilities</em>: the things it needs to be able to perform the actions it&#8217;s given. In practice, these are the dependencies that the interaction functions will expect to be passed, like a <code>browser</code> or a <code>database</code> connection. In our simple example, we just need a reference to the <code>app</code>. It&#8217;s also useful for the Actor to know its own name, so we&#8217;ll take these two properties when constructing our <code>Actor</code>:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="javascript"><span class="kd">class</span> <span class="nx">Actor</span> <span class="p">{</span>
+  <span class="kd">constructor</span><span class="p">(</span><span class="nx">name</span><span class="p">,</span> <span class="nx">abilities</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">abilities</span> <span class="o">=</span> <span class="nx">abilities</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">name</span> <span class="o">=</span> <span class="nx">name</span>
+  <span class="p">}</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Now, the actor has everything it needs to be able to attempt to perform an action:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="javascript">  <span class="nx">attemptsTo</span><span class="p">(</span><span class="nx">action</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nx">action</span><span class="p">({</span> <span class="na">name</span><span class="p">:</span> <span class="k">this</span><span class="p">.</span><span class="nx">name</span><span class="p">,</span> <span class="p">...</span><span class="k">this</span><span class="p">.</span><span class="nx">abilities</span> <span class="p">})</span>
+  <span class="p">}</span>
+<span class="p">}</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Perfect.</p>
+</div>
+<div class="paragraph">
+<p>Now we can use the shiny new <code>Actor</code> in our step deifnition:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="javascript"><span class="nx">Given</span><span class="p">(</span><span class="dl">'</span><span class="s1">{word} has created an account</span><span class="dl">'</span><span class="p">,</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">name</span><span class="p">)</span> <span class="p">{</span>
+  <span class="kd">const</span> <span class="nx">actor</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Actor</span><span class="p">(</span><span class="nx">name</span><span class="p">,</span> <span class="k">this</span><span class="p">)</span>
+  <span class="nx">actor</span><span class="p">.</span><span class="nx">attemptsTo</span><span class="p">(</span><span class="nx">CreateAccount</span><span class="p">.</span><span class="nx">forThemselves</span><span class="p">)</span>
+<span class="p">})</span></code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_using_a_custom_parameter_type">Using a custom parameter type</h3>
+<div class="paragraph">
+<p>Since the screenplay pattern centres around these Actors, we don&#8217;t want to have to keep constructing them in our step definitions. Fortunately, Cucumber gives us <a href="https://cucumber.io/docs/cucumber/cucumber-expressions/#custom-parameter-types">custom parameter types</a> that allows us to transform the text <code>Sue</code>, <code>Tanya</code> or <code>Bob</code> into an instance of <code>Actor</code> that represents them.</p>
+</div>
+<div class="paragraph">
+<p>Here&#8217;s how we do that:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="javascript"><span class="kd">const</span> <span class="p">{</span> <span class="nx">defineParameterType</span> <span class="p">}</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="dl">'</span><span class="s1">cucumber</span><span class="dl">'</span><span class="p">)</span>
+
+<span class="nx">defineParameterType</span><span class="p">({</span>
+  <span class="na">name</span><span class="p">:</span> <span class="dl">'</span><span class="s1">actor</span><span class="dl">'</span><span class="p">,</span>
+  <span class="na">regexp</span><span class="p">:</span> <span class="sr">/</span><span class="se">\w</span><span class="sr">+/</span><span class="p">,</span>
+  <span class="na">transformer</span><span class="p">:</span> <span class="kd">function</span><span class="p">(</span><span class="nx">name</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="k">new</span> <span class="nx">Actor</span><span class="p">(</span><span class="nx">name</span><span class="p">,</span> <span class="k">this</span><span class="p">)</span>
+  <span class="p">}</span>
+<span class="p">})</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Now we can ask for an instance of <code>Actor</code> in our step definition:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="javascript"><span class="nx">Given</span><span class="p">(</span><span class="dl">'</span><span class="s1">{actor} has created an account</span><span class="dl">'</span><span class="p">,</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">actor</span><span class="p">)</span> <span class="p">{</span>
+  <span class="nx">actor</span><span class="p">.</span><span class="nx">attemptsTo</span><span class="p">(</span><span class="nx">CreateAccount</span><span class="p">.</span><span class="nx">forThemselves</span><span class="p">)</span>
+<span class="p">})</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>In fact, we can now use an arrow function for our step definition:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="javascript"><span class="nx">Given</span><span class="p">(</span><span class="dl">'</span><span class="s1">{actor} has created an account</span><span class="dl">'</span><span class="p">,</span>
+  <span class="nx">actor</span> <span class="o">=&gt;</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">attemptsTo</span><span class="p">(</span><span class="nx">CreateAccount</span><span class="p">.</span><span class="nx">forThemselves</span><span class="p">)</span>
+<span class="p">)</span></code></pre>
+</div>
+</div>
+</div>
 </div>
 </div>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2020-02-27 15:31:10 UTC
+Last updated 2020-02-27 15:59:04 UTC
 </div>
 </div>
 <style>
