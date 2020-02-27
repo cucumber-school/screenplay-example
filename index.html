@@ -895,18 +895,20 @@ This pattern is a way out of that.</p>
 <h2 id="_refactoring_to_screenplay">Refactoring to Screenplay</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>When refactoring to Screenplay, I&#8217;ve found it&#8217;s best to start with the smallest elements of behaviour first. Let&#8217;s pick the <code>createAccount</code> helper method:</p>
+<p>When refactoring to Screenplay, I&#8217;ve found it&#8217;s best to start with the smallest elements of behaviour first. Let&#8217;s pick the <code>createAccount</code> helper method in the <code>DomainDriver</code>:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="rouge highlight"><code data-lang="javascript"><span class="kd">class</span> <span class="nx">DomainDriver</span> <span class="p">{</span>
-  <span class="nx">createAccount</span><span class="p">({</span> <span class="nx">name</span> <span class="p">})</span> <span class="p">{</span>
+<pre class="rouge highlight"><code data-lang="javascript">  <span class="nx">createAccount</span><span class="p">({</span> <span class="nx">name</span> <span class="p">})</span> <span class="p">{</span>
     <span class="k">this</span><span class="p">.</span><span class="nx">app</span><span class="p">.</span><span class="nx">accounts</span><span class="p">[</span><span class="nx">name</span><span class="p">]</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Account</span><span class="p">({</span> <span class="nx">name</span> <span class="p">})</span>
   <span class="p">}</span></code></pre>
 </div>
 </div>
 <div class="paragraph">
-<p>We call this method twice from our steps. Let&#8217;s inline the first instance so that&#8230;&#8203;</p>
+<p>We call this method twice from our steps. We&#8217;ll work with the first instance to turn this into a screenplay <em>interaction</em> and call it, then we&#8217;ll tidy up/</p>
+</div>
+<div class="paragraph">
+<p>Let&#8217;s inline the first instance so that&#8230;&#8203;</p>
 </div>
 <div class="listingblock">
 <div class="content">
