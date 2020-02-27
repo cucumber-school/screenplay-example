@@ -1,21 +1,30 @@
+require 'tmpdir'
 namespace :docs do
   task :code do
+    pwd = Dir.pwd
     current_branch = `git rev-parse --abbrev-ref HEAD`
-    `rm -rf code`
-    `mkdir code`
-    `git config advice.detachedHead false`
-    commits = `git rev-list start...end`.split.reverse
-    commits.each_with_index do |commit, i|
-      message = `git show -s --format=%s #{commit}`.
-        downcase.
-        gsub(/ /, '-').
-        gsub(/[.,\':]/, '')
-      dir = "code/%02d-#{message}" % i
-      `mkdir #{dir}`
-      `git checkout #{commit}`
-      `cp -R {lib,features,package.json} #{dir}`
+    sh 'rm -rf code'
+    sh 'mkdir code'
+    Dir.chdir(Dir.tmpdir) do
+      sh("git clone --quiet #{pwd} screenplay-example") unless Dir.exists?('screenplay-example') && Dir.exists?('screenplay-example/.git')
+      Dir.chdir("screenplay-example") do
+        puts "Working in #{Dir.pwd}"
+        sh "git fetch origin"
+        sh "git config advice.detachedHead false"
+        sh "git branch -D code || echo no code branch"
+        sh "git checkout -b code &> /dev/null"
+        commits = `git rev-list code`.split.reverse
+        puts commits
+        commits.each_with_index do |commit, i|
+          commit_message = `git show -s --format=%s #{commit}`.split("\n").first
+          dir = "#{pwd}/code/%02d-#{commit_message.downcase.gsub(/\W+/, "-")}" % i
+          sh "mkdir #{dir}"
+          sh "git checkout #{commit}"
+          sh "cp -R . #{dir}"
+          sh "rm -rf #{dir}/.git"
+        end
+      end
     end
-    `git checkout #{current_branch}`
   end
 
   task :html do
