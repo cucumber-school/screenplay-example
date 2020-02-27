@@ -1,0 +1,92 @@
+
+== Composing Tasks from Interactions
+
+Previously, we extracted our a simple implementation of the screenplay pattern from some existing Cucumber automation code, turning this:
+
+[source,javascript]
+----
+include::../code/02-add-create-project-feature/features/step_definitions/steps.js[lines=4..7]
+----
+
+...into this:
+
+[source,javascript]
+----
+include::../code/08-use-arrow-function/features/step_definitions/steps.js[lines=29..32]
+----
+
+We're going to continue this refactoring, looking at how we can compose granular interactions into _tasks_ that model higher-level concepts in our problem domain.
+
+=== Multiple interactions
+
+The other place where we were using the `createAccount` method is in this step definition:
+
+[source,javascript]
+----
+include::../code/08-use-arrow-function/features/step_definitions/steps.js[lines=42..45]
+----
+
+In this case, creating an account is part of a bigger goal, or _task_: to sign up. First we create the account, then we activate it. Together, these two steps achieve that task.
+
+We can use the same steps as last time to create a new interaction, `Activate.theirAccount`:
+
+[source,javascript]
+----
+include::../code/09-activate-account-interaction/features/step_definitions/steps.js[lines=30..36]
+----
+
+We can change the step definition above to use the two new interactions:
+
+[source,javascript]
+----
+include::../code/09-activate-account-interaction/features/step_definitions/steps.js[lines=50..53]
+----
+
+This is OK, but it's a bit ugly. What if we could do this instead?
+
+[source,javascript]
+----
+include::../code/10-multiple-interactions/features/step_definitions/steps.js[lines=50..56]
+----
+
+Good news, we can! We just need to tweak our `Actor` to accept an array of interations:
+
+[source,javascript]
+----
+include::../code/10-multiple-interactions/features/step_definitions/steps.js[lines=5..14]
+----
+
+Now we can pass one or more interactions to our Actor and it will attempt each of them in turn.
+
+=== Composing a task
+
+Let's look at how we could model the _task_ of signing up in the Screenflow style.
+
+In Screenplay, tasks are distinct from interactions because they do not interact directly with the system under test: intead, they attempt interactions, or other tasks.
+
+In order for our actor to be able to perform tasks, we need to give it one new, special ability:
+
+[source,javascript]
+----
+include::../code/11-sign-up-task/features/step_definitions/steps.js[lines=5..18]
+----
+
+We've added the Actor's `attemptsTo` method to the set of abilities that will be passed to the tasks or interations being attempted. To reflect the fact that the parameters in the `attemptsTo` method could be tasks or interactions, we're renamed them to the more general `actions`.
+
+This enables us to build a new `SignUp` task:
+
+[source,javascript]
+----
+include::../code/11-sign-up-task/features/step_definitions/steps.js[lines=42..46]
+----
+
+Now we can use the task in our step definition:
+
+[source,javascript]
+----
+include::../code/11-sign-up-task/features/step_definitions/steps.js[lines=60..62]
+----
+
+Nice. Again, we can see a clear mapping from the plain English in our scenario to the code we're running in our automation layer.
+
+The `SignUp` task has a dependency on the two interactions, but it sits as an independent function, intead of adding more bloat to a helper class. The separation between tasks and interactions gives us the potential to choose different sets of interactions to use with your tasks, depending on whether you want to interact with your app via the UI, or at a lower level.

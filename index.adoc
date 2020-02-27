@@ -6,3 +6,4 @@ Matt Wynne <matt@cucumber.io>
 include::docs/1-intro.adoc[]
 include::docs/2-helpers.adoc[]
 include::docs/3-refactoring-to-screenplay.adoc[]
+include::docs/4-composing-interactions.adoc[]

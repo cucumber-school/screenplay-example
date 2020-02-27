@@ -472,6 +472,12 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <li><a href="#_wrapping_up">Wrapping up</a></li>
 </ul>
 </li>
+<li><a href="#_composing_tasks_from_interactions">Composing Tasks from Interactions</a>
+<ul class="sectlevel2">
+<li><a href="#_multiple_interactions">Multiple interactions</a></li>
+<li><a href="#_composing_a_task">Composing a task</a></li>
+</ul>
+</li>
 </ul>
 </div>
 </div>
@@ -1118,10 +1124,173 @@ This pattern is a way out of that.</p>
 </div>
 </div>
 </div>
+<div class="sect1">
+<h2 id="_composing_tasks_from_interactions">Composing Tasks from Interactions</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Previously, we extracted our a simple implementation of the screenplay pattern from some existing Cucumber automation code, turning this:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="javascript"><span class="nx">Given</span><span class="p">(</span><span class="dl">'</span><span class="s1">{word} has created an account</span><span class="dl">'</span><span class="p">,</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">name</span><span class="p">)</span> <span class="p">{</span>
+  <span class="k">this</span><span class="p">.</span><span class="nx">createAccount</span><span class="p">({</span> <span class="nx">name</span> <span class="p">})</span>
+<span class="p">})</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>&#8230;&#8203;into this:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="javascript"><span class="nx">Given</span><span class="p">(</span><span class="dl">'</span><span class="s1">{actor} has created an account</span><span class="dl">'</span><span class="p">,</span>
+  <span class="nx">actor</span> <span class="o">=&gt;</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">attemptsTo</span><span class="p">(</span><span class="nx">CreateAccount</span><span class="p">.</span><span class="nx">forThemselves</span><span class="p">)</span>
+<span class="p">)</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>We&#8217;re going to continue this refactoring, looking at how we can compose granular interactions into <em>tasks</em> that model higher-level concepts in our problem domain.</p>
+</div>
+<div class="sect2">
+<h3 id="_multiple_interactions">Multiple interactions</h3>
+<div class="paragraph">
+<p>The other place where we were using the <code>createAccount</code> method is in this step definition:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="javascript"><span class="nx">Given</span><span class="p">(</span><span class="dl">'</span><span class="s1">{word} has signed up</span><span class="dl">'</span><span class="p">,</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">name</span><span class="p">)</span> <span class="p">{</span>
+  <span class="k">this</span><span class="p">.</span><span class="nx">createAccount</span><span class="p">({</span> <span class="nx">name</span> <span class="p">})</span>
+  <span class="k">this</span><span class="p">.</span><span class="nx">activateAccount</span><span class="p">({</span> <span class="nx">name</span> <span class="p">})</span>
+<span class="p">})</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>In this case, creating an account is part of a bigger goal, or <em>task</em>: to sign up. First we create the account, then we activate it. Together, these two steps achieve that task.</p>
+</div>
+<div class="paragraph">
+<p>We can use the same steps as last time to create a new interaction, <code>Activate.theirAccount</code>:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="javascript"><span class="kd">const</span> <span class="nx">Activate</span> <span class="o">=</span> <span class="p">{</span>
+  <span class="na">theirAccount</span><span class="p">:</span>
+    <span class="p">({</span> <span class="nx">name</span><span class="p">,</span> <span class="nx">app</span> <span class="p">})</span> <span class="o">=&gt;</span> <span class="p">{</span>
+      <span class="nx">app</span><span class="p">.</span><span class="nx">getAccount</span><span class="p">(</span><span class="nx">name</span><span class="p">).</span><span class="nx">activate</span><span class="p">()</span>
+      <span class="nx">app</span><span class="p">.</span><span class="nx">authenticate</span><span class="p">({</span> <span class="nx">name</span> <span class="p">})</span>
+    <span class="p">}</span>
+<span class="p">}</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>We can change the step definition above to use the two new interactions:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="javascript"><span class="nx">Given</span><span class="p">(</span><span class="dl">'</span><span class="s1">{actor} has signed up</span><span class="dl">'</span><span class="p">,</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">actor</span><span class="p">)</span> <span class="p">{</span>
+  <span class="nx">actor</span><span class="p">.</span><span class="nx">attemptsTo</span><span class="p">(</span><span class="nx">CreateAccount</span><span class="p">.</span><span class="nx">forThemselves</span><span class="p">)</span>
+  <span class="nx">actor</span><span class="p">.</span><span class="nx">attemptsTo</span><span class="p">(</span><span class="nx">Activate</span><span class="p">.</span><span class="nx">theirAccount</span><span class="p">)</span>
+<span class="p">})</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>This is OK, but it&#8217;s a bit ugly. What if we could do this instead?</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="javascript"><span class="nx">Given</span><span class="p">(</span><span class="dl">'</span><span class="s1">{actor} has signed up</span><span class="dl">'</span><span class="p">,</span>
+  <span class="nx">actor</span> <span class="o">=&gt;</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">attemptsTo</span><span class="p">(</span>
+    <span class="nx">CreateAccount</span><span class="p">.</span><span class="nx">forThemselves</span><span class="p">,</span>
+    <span class="nx">Activate</span><span class="p">.</span><span class="nx">theirAccount</span>
+  <span class="p">)</span>
+<span class="p">)</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Good news, we can! We just need to tweak our <code>Actor</code> to accept an array of interations:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="javascript"><span class="kd">class</span> <span class="nx">Actor</span> <span class="p">{</span>
+  <span class="kd">constructor</span><span class="p">(</span><span class="nx">abilities</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">abilities</span> <span class="o">=</span> <span class="nx">abilities</span>
+  <span class="p">}</span>
+
+  <span class="nx">attemptsTo</span><span class="p">(...</span><span class="nx">interactions</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">for</span><span class="p">(</span><span class="kd">const</span> <span class="nx">interaction</span> <span class="k">of</span> <span class="nx">interactions</span><span class="p">)</span>
+      <span class="nx">interaction</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">abilities</span><span class="p">)</span>
+  <span class="p">}</span>
+<span class="p">}</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Now we can pass one or more interactions to our Actor and it will attempt each of them in turn.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_composing_a_task">Composing a task</h3>
+<div class="paragraph">
+<p>Let&#8217;s look at how we could model the <em>task</em> of signing up in the Screenflow style.</p>
+</div>
+<div class="paragraph">
+<p>In Screenplay, tasks are distinct from interactions because they do not interact directly with the system under test: intead, they attempt interactions, or other tasks.</p>
+</div>
+<div class="paragraph">
+<p>In order for our actor to be able to perform tasks, we need to give it one new, special ability:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="javascript"><span class="kd">class</span> <span class="nx">Actor</span> <span class="p">{</span>
+  <span class="kd">constructor</span><span class="p">(</span><span class="nx">abilities</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">abilities</span> <span class="o">=</span> <span class="p">{</span>
+      <span class="p">...</span><span class="nx">abilities</span><span class="p">,</span>
+      <span class="na">attemptsTo</span><span class="p">:</span> <span class="k">this</span><span class="p">.</span><span class="nx">attemptsTo</span><span class="p">.</span><span class="nx">bind</span><span class="p">(</span><span class="k">this</span><span class="p">)</span>
+    <span class="p">}</span>
+  <span class="p">}</span>
+
+  <span class="nx">attemptsTo</span><span class="p">(...</span><span class="nx">actions</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">for</span><span class="p">(</span><span class="kd">const</span> <span class="nx">action</span> <span class="k">of</span> <span class="nx">actions</span><span class="p">)</span>
+      <span class="nx">action</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">abilities</span><span class="p">)</span>
+  <span class="p">}</span>
+<span class="p">}</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>We&#8217;ve added the Actor&#8217;s <code>attemptsTo</code> method to the set of abilities that will be passed to the tasks or interations being attempted. To reflect the fact that the parameters in the <code>attemptsTo</code> method could be tasks or interactions, we&#8217;re renamed them to the more general <code>actions</code>.</p>
+</div>
+<div class="paragraph">
+<p>This enables us to build a new <code>SignUp</code> task:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="javascript"><span class="kd">const</span> <span class="nx">SignUp</span> <span class="o">=</span>
+  <span class="p">({</span> <span class="nx">attemptsTo</span> <span class="p">})</span> <span class="o">=&gt;</span> <span class="nx">attemptsTo</span><span class="p">(</span>
+    <span class="nx">CreateAccount</span><span class="p">.</span><span class="nx">forThemselves</span><span class="p">,</span>
+    <span class="nx">Activate</span><span class="p">.</span><span class="nx">theirAccount</span>
+  <span class="p">)</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Now we can use the task in our step definition:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="javascript"><span class="nx">Given</span><span class="p">(</span><span class="dl">'</span><span class="s1">{actor} has signed up</span><span class="dl">'</span><span class="p">,</span>
+  <span class="nx">actor</span> <span class="o">=&gt;</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">attemptsTo</span><span class="p">(</span><span class="nx">SignUp</span><span class="p">)</span>
+<span class="p">)</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Nice. Again, we can see a clear mapping from the plain English in our scenario to the code we&#8217;re running in our automation layer.</p>
+</div>
+<div class="paragraph">
+<p>The <code>SignUp</code> task has a dependency on the two interactions, but it sits as an independent function, intead of adding more bloat to a helper class. The separation between tasks and interactions gives us the potential to choose different sets of interactions to use with your tasks, depending on whether you want to interact with your app via the UI, or at a lower level.</p>
+</div>
+</div>
+</div>
+</div>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2020-02-27 17:02:35 UTC
+Last updated 2020-02-27 22:09:13 UTC
 </div>
 </div>
 <style>
