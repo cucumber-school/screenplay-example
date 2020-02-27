@@ -27,9 +27,9 @@ const CreateAccount = {
     ({ name, app }) => app.accounts[name] = new Account({ name })
 }
 
-Given('{actor} has created an account', function (actor) {
-  actor.attemptsTo(CreateAccount.forThemselves)
-})
+Given('{actor} has created an account', 
+  actor => actor.attemptsTo(CreateAccount.forThemselves)
+)
 
 When('{word} tries to sign in', function (name) {
   this.signIn({ name })
