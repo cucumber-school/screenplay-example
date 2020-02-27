@@ -52,13 +52,13 @@ As they tend to do from time to time, our product owner would like this app of o
 Here's the feature file:
 [source,gherkin]
 ----
-include::../code/01-add-create-project-feature/features/create_project.feature[]
+include::../code/03-add-create-project-feature/features/create_project.feature[]
 ----
 
 We've introduced a handful of new steps here. Let's look at how these are defined:
 [source,js]
 ----
-include::../code/01-add-create-project-feature/features/step_definitions/steps.js[]
+include::../code/03-add-create-project-feature/features/step_definitions/steps.js[]
 ----
 
 This all seems quite straightforward in our simple example, but if we're really sensitive to them, we might notice a couple of issues that could cause concern as the codebase grows.

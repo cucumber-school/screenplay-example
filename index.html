@@ -721,7 +721,20 @@ This pattern is a way out of that.</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="rouge highlight"><code data-lang="gherkin"><span class="err">Unresolved directive in docs/2-helpers.adoc - include</span><span class="p">::</span><span class="err">../code/01-add-create-project-feature/features/create_project.feature[]</span></code></pre>
+<pre class="rouge highlight"><code data-lang="gherkin"><span class="kd">Feature</span><span class="p">:</span> Create project
+
+  Users can create projects, only visible to themselves
+
+  <span class="kn">Scenario</span><span class="p">:</span> Create one project
+    <span class="nf">Given </span>Sue has signed up
+    <span class="nf">When </span>Sue creates a project
+    <span class="nf">Then </span>Sue should see the project
+
+  <span class="kn">Scenario</span><span class="p">:</span> Try to see someone else's project
+    <span class="nf">Given </span>Sue has signed up
+    <span class="nf">And </span>Bob has signed up
+    <span class="nf">When </span>Sue creates a project
+    <span class="nf">Then </span>Bob should not see any projects</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -729,7 +742,58 @@ This pattern is a way out of that.</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="rouge highlight"><code data-lang="js"><span class="nx">Unresolved</span> <span class="nx">directive</span> <span class="k">in</span> <span class="nx">docs</span><span class="o">/</span><span class="mi">2</span><span class="o">-</span><span class="nx">helpers</span><span class="p">.</span><span class="nx">adoc</span> <span class="o">-</span> <span class="nx">include</span><span class="p">::..</span><span class="o">/</span><span class="nx">code</span><span class="o">/</span><span class="mi">01</span><span class="o">-</span><span class="nx">add</span><span class="o">-</span><span class="nx">create</span><span class="o">-</span><span class="nx">project</span><span class="o">-</span><span class="nx">feature</span><span class="o">/</span><span class="nx">features</span><span class="o">/</span><span class="nx">step_definitions</span><span class="o">/</span><span class="nx">steps</span><span class="p">.</span><span class="nx">js</span><span class="p">[]</span></code></pre>
+<pre class="rouge highlight"><code data-lang="js"><span class="kd">const</span> <span class="p">{</span> <span class="nx">Given</span><span class="p">,</span> <span class="nx">When</span><span class="p">,</span> <span class="nx">Then</span> <span class="p">}</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="dl">'</span><span class="s1">cucumber</span><span class="dl">'</span><span class="p">)</span>
+<span class="kd">const</span> <span class="p">{</span> <span class="nx">assertThat</span><span class="p">,</span> <span class="nx">is</span><span class="p">,</span> <span class="nx">not</span><span class="p">,</span> <span class="nx">matchesPattern</span><span class="p">,</span> <span class="nx">hasItem</span><span class="p">,</span> <span class="nx">isEmpty</span> <span class="p">}</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="dl">'</span><span class="s1">hamjest</span><span class="dl">'</span><span class="p">)</span>
+
+<span class="nx">Given</span><span class="p">(</span><span class="dl">'</span><span class="s1">{word} has created an account</span><span class="dl">'</span><span class="p">,</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">name</span><span class="p">)</span> <span class="p">{</span>
+  <span class="k">this</span><span class="p">.</span><span class="nx">createAccount</span><span class="p">({</span> <span class="nx">name</span> <span class="p">})</span>
+<span class="p">})</span>
+
+<span class="nx">When</span><span class="p">(</span><span class="dl">'</span><span class="s1">{word} tries to sign in</span><span class="dl">'</span><span class="p">,</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">name</span><span class="p">)</span> <span class="p">{</span>
+  <span class="k">this</span><span class="p">.</span><span class="nx">signIn</span><span class="p">({</span> <span class="nx">name</span> <span class="p">})</span>
+<span class="p">})</span>
+
+<span class="nx">When</span><span class="p">(</span><span class="dl">'</span><span class="s1">{word} activates his/her account</span><span class="dl">'</span><span class="p">,</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">name</span><span class="p">)</span> <span class="p">{</span>
+  <span class="k">this</span><span class="p">.</span><span class="nx">activateAccount</span><span class="p">({</span> <span class="nx">name</span> <span class="p">})</span>
+<span class="p">})</span>
+
+<span class="nx">Given</span><span class="p">(</span><span class="dl">'</span><span class="s1">{word} has signed up</span><span class="dl">'</span><span class="p">,</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">name</span><span class="p">)</span> <span class="p">{</span>
+  <span class="k">this</span><span class="p">.</span><span class="nx">createAccount</span><span class="p">({</span> <span class="nx">name</span> <span class="p">})</span>
+  <span class="k">this</span><span class="p">.</span><span class="nx">activateAccount</span><span class="p">({</span> <span class="nx">name</span> <span class="p">})</span>
+<span class="p">})</span>
+
+<span class="nx">When</span><span class="p">(</span><span class="dl">'</span><span class="s1">{word} (tries to )create(s) a project</span><span class="dl">'</span><span class="p">,</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">name</span><span class="p">)</span> <span class="p">{</span>
+  <span class="k">this</span><span class="p">.</span><span class="nx">createProject</span><span class="p">({</span> <span class="nx">name</span><span class="p">,</span> <span class="na">project</span><span class="p">:</span> <span class="p">{</span> <span class="na">name</span><span class="p">:</span> <span class="dl">'</span><span class="s1">a-project</span><span class="dl">'</span> <span class="p">}})</span>
+<span class="p">})</span>
+
+<span class="nx">Then</span><span class="p">(</span><span class="dl">'</span><span class="s1">{word} should see the project</span><span class="dl">'</span><span class="p">,</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">name</span><span class="p">)</span> <span class="p">{</span>
+  <span class="nx">assertThat</span><span class="p">(</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">getProjects</span><span class="p">({</span> <span class="nx">name</span> <span class="p">}),</span>
+    <span class="nx">hasItem</span><span class="p">({</span> <span class="na">name</span><span class="p">:</span> <span class="dl">'</span><span class="s1">a-project</span><span class="dl">'</span> <span class="p">})</span>
+  <span class="p">)</span>
+<span class="p">})</span>
+
+<span class="nx">Then</span><span class="p">(</span><span class="dl">'</span><span class="s1">{word} should not see any projects</span><span class="dl">'</span><span class="p">,</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">name</span><span class="p">)</span> <span class="p">{</span>
+  <span class="nx">assertThat</span><span class="p">(</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">getProjects</span><span class="p">({</span> <span class="nx">name</span> <span class="p">}),</span>
+    <span class="nx">isEmpty</span><span class="p">()</span>
+  <span class="p">)</span>
+<span class="p">})</span>
+
+<span class="nx">Then</span><span class="p">(</span><span class="dl">'</span><span class="s1">{word} should not be authenticated</span><span class="dl">'</span><span class="p">,</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">name</span><span class="p">)</span> <span class="p">{</span>
+  <span class="nx">assertThat</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">isAuthenticated</span><span class="p">({</span> <span class="nx">name</span> <span class="p">}),</span> <span class="nx">is</span><span class="p">(</span><span class="nx">not</span><span class="p">(</span><span class="kc">true</span><span class="p">)))</span>
+<span class="p">})</span>
+
+<span class="nx">Then</span><span class="p">(</span><span class="dl">'</span><span class="s1">{word} should be authenticated</span><span class="dl">'</span><span class="p">,</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">name</span><span class="p">)</span> <span class="p">{</span>
+  <span class="nx">assertThat</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">isAuthenticated</span><span class="p">({</span> <span class="nx">name</span> <span class="p">}),</span> <span class="nx">is</span><span class="p">(</span><span class="kc">true</span><span class="p">))</span>
+<span class="p">})</span>
+
+<span class="nx">Then</span><span class="p">(</span><span class="dl">'</span><span class="s1">{word} should see an error telling him/her to activate the account</span><span class="dl">'</span><span class="p">,</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">name</span><span class="p">)</span> <span class="p">{</span>
+  <span class="nx">assertThat</span><span class="p">(</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">authenticationError</span><span class="p">({</span> <span class="nx">name</span> <span class="p">}),</span>
+    <span class="nx">matchesPattern</span><span class="p">(</span><span class="sr">/activate your account/</span><span class="p">)</span>
+  <span class="p">)</span>
+<span class="p">})</span></code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -862,7 +926,7 @@ This pattern is a way out of that.</p>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2020-02-27 14:49:47 UTC
+Last updated 2020-02-27 15:11:45 UTC
 </div>
 </div>
 <style>
