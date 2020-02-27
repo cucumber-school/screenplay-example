@@ -3,6 +3,7 @@ namespace :docs do
     current_branch = `git rev-parse --abbrev-ref HEAD`
     `rm -rf code`
     `mkdir code`
+    `git config advice.detachedHead false`
     commits = `git rev-list start...end`.split.reverse
     commits.each_with_index do |commit, i|
       message = `git show -s --format=%s #{commit}`.
