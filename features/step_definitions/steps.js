@@ -22,9 +22,13 @@ defineParameterType({
   }
 })
 
+const CreateAccount = {
+  forThemselves:
+    ({ name, app }) => app.accounts[name] = new Account({ name })
+}
+
 Given('{actor} has created an account', function (actor) {
-  const interaction = ({ name, app }) => app.accounts[name] = new Account({ name })
-  actor.attemptsTo(interaction)
+  actor.attemptsTo(CreateAccount.forThemselves)
 })
 
 When('{word} tries to sign in', function (name) {
