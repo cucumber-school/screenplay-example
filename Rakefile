@@ -13,6 +13,7 @@ namespace :docs do
         sh "git config advice.detachedHead false"
         sh "git branch -D code || echo no code branch"
         sh "git checkout -b code &> /dev/null"
+        sh "git reset --hard origin/code"
         commits = `git rev-list code`.split.reverse
         puts commits
         commits.each_with_index do |commit, i|
