@@ -7,8 +7,9 @@ class Actor {
     this.abilities = abilities
   }
 
-  attemptsTo(interaction) {
-    interaction(this.abilities)
+  attemptsTo(...interactions) {
+    for(const interaction of interactions)
+      interaction(this.abilities)
   }
 }
 
@@ -47,10 +48,12 @@ When('{word} activates his/her account', function (name) {
   this.activateAccount({ name })
 })
 
-Given('{actor} has signed up', function (actor) {
-  actor.attemptsTo(CreateAccount.forThemselves)
-  actor.attemptsTo(Activate.theirAccount)
-})
+Given('{actor} has signed up', 
+  actor => actor.attemptsTo(
+    CreateAccount.forThemselves,
+    Activate.theirAccount
+  )
+)
 
 When('{word} (tries to )create(s) a project', function (name) {
   this.createProject({ name, project: { name: 'a-project' }})
