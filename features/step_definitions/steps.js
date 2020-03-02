@@ -2,9 +2,20 @@ const { Given, When, Then } = require('cucumber')
 const { assertThat, is, not, matchesPattern, hasItem, isEmpty } = require('hamjest')
 const { Account } = require('../../lib/app')
 
+class Actor {
+  constructor(abilities) {
+    this.abilities = abilities
+  }
+
+  attemptsTo(interaction) {
+    interaction(this.abilities)
+  }
+}
+
 Given('{word} has created an account', function (name) {
   const interaction = ({ name, app }) => app.accounts[name] = new Account({ name })
-  interaction({ name, app: this.app })
+  const actor = new Actor({ name, app: this.app })
+  actor.attemptsTo(interaction)
 })
 
 When('{word} tries to sign in', function (name) {
