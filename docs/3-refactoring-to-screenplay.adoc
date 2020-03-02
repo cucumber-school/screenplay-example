@@ -1,7 +1,11 @@
 
 == Refactoring to Screenplay
 
-When refactoring to Screenplay, I've found it's best to start with the smallest elements of behaviour first. Let's pick the `createAccount` helper method in the `DomainDriver`:
+Now we understand the need for a new kind of pattern for organising our test automation code, we're going to work with this little codebase to refactor it towards the Screenplay pattern. By taking the existing code and shifting it, step-by-step, towards the pattern, my hope is that you'll see how you could do this on your own code.
+
+When refactoring to Screenplay, I've found it's best to start with the smallest elements of behaviour first. The leaf-nodes, if you will. So we need to look for a helper method that just does one thing.
+
+Let's pick the `createAccount` helper method in the `DomainDriver`:
 
 [source,javascript]
 ----
@@ -40,11 +44,11 @@ include::../code/03-refactor-inline-helper/features/step_definitions/steps.js[li
 
 Now we have the code back up in the step definition, we can re-shape it into a Screenplay style.
 
-### Extract Interaction
+=== Extract Interaction
 
 We'll put the code that does this work into an https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Functions/Arrow_functions[arrow function expression] which will become our first _Interaction_. The interaction takes all the dependencies and information it will need to do its work. In this case, it needs a reference to the `app` it will use to fetch the accounts, and the `name` of the actor.
 
-To complete this first refactoring, we call the interaction function, passing the name from the step definition and destructuring `this` to give us the `app` parameter.
+To complete this first refactoring, we call the interaction function, passing the name from the step definition and a reference to the `app`.
 
 [source,javascript]
 ----

@@ -909,7 +909,13 @@ This pattern is a way out of that.</p>
 <h2 id="_refactoring_to_screenplay">Refactoring to Screenplay</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>When refactoring to Screenplay, I&#8217;ve found it&#8217;s best to start with the smallest elements of behaviour first. Let&#8217;s pick the <code>createAccount</code> helper method in the <code>DomainDriver</code>:</p>
+<p>Now we understand the need for a new kind of pattern for organising our test automation code, we&#8217;re going to work with this little codebase to refactor it towards the Screenplay pattern. By taking the existing code and shifting it, step-by-step, towards the pattern, my hope is that you&#8217;ll see how you could do this on your own code.</p>
+</div>
+<div class="paragraph">
+<p>When refactoring to Screenplay, I&#8217;ve found it&#8217;s best to start with the smallest elements of behaviour first. The leaf-nodes, if you will. So we need to look for a helper method that just does one thing.</p>
+</div>
+<div class="paragraph">
+<p>Let&#8217;s pick the <code>createAccount</code> helper method in the <code>DomainDriver</code>:</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -971,13 +977,13 @@ This pattern is a way out of that.</p>
 <p>We&#8217;ll put the code that does this work into an <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Functions/Arrow_functions">arrow function expression</a> which will become our first <em>Interaction</em>. The interaction takes all the dependencies and information it will need to do its work. In this case, it needs a reference to the <code>app</code> it will use to fetch the accounts, and the <code>name</code> of the actor.</p>
 </div>
 <div class="paragraph">
-<p>To complete this first refactoring, we call the interaction function, passing the name from the step definition and destructuring <code>this</code> to give us the <code>app</code> parameter.</p>
+<p>To complete this first refactoring, we call the interaction function, passing the name from the step definition and a reference to the <code>app</code>.</p>
 </div>
 <div class="listingblock">
 <div class="content">
 <pre class="rouge highlight"><code data-lang="javascript"><span class="nx">Given</span><span class="p">(</span><span class="dl">'</span><span class="s1">{word} has created an account</span><span class="dl">'</span><span class="p">,</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">name</span><span class="p">)</span> <span class="p">{</span>
   <span class="kd">const</span> <span class="nx">interaction</span> <span class="o">=</span> <span class="p">({</span> <span class="nx">name</span><span class="p">,</span> <span class="nx">app</span> <span class="p">})</span> <span class="o">=&gt;</span> <span class="nx">app</span><span class="p">.</span><span class="nx">accounts</span><span class="p">[</span><span class="nx">name</span><span class="p">]</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Account</span><span class="p">({</span> <span class="nx">name</span> <span class="p">})</span>
-  <span class="nx">interaction</span><span class="p">({</span> <span class="nx">name</span><span class="p">,</span> <span class="p">...</span><span class="k">this</span> <span class="p">})</span>
+  <span class="nx">interaction</span><span class="p">({</span> <span class="nx">name</span><span class="p">,</span> <span class="na">app</span><span class="p">:</span> <span class="k">this</span><span class="p">.</span><span class="nx">app</span> <span class="p">})</span>
 <span class="p">})</span></code></pre>
 </div>
 </div>
@@ -1022,7 +1028,7 @@ This pattern is a way out of that.</p>
 <div class="content">
 <pre class="rouge highlight"><code data-lang="javascript"><span class="nx">Given</span><span class="p">(</span><span class="dl">'</span><span class="s1">{word} has created an account</span><span class="dl">'</span><span class="p">,</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">name</span><span class="p">)</span> <span class="p">{</span>
   <span class="kd">const</span> <span class="nx">interaction</span> <span class="o">=</span> <span class="p">({</span> <span class="nx">name</span><span class="p">,</span> <span class="nx">app</span> <span class="p">})</span> <span class="o">=&gt;</span> <span class="nx">app</span><span class="p">.</span><span class="nx">accounts</span><span class="p">[</span><span class="nx">name</span><span class="p">]</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Account</span><span class="p">({</span> <span class="nx">name</span> <span class="p">})</span>
-  <span class="kd">const</span> <span class="nx">actor</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Actor</span><span class="p">({</span> <span class="nx">name</span><span class="p">,</span> <span class="p">...</span><span class="k">this</span> <span class="p">})</span>
+  <span class="kd">const</span> <span class="nx">actor</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Actor</span><span class="p">({</span> <span class="nx">name</span><span class="p">,</span> <span class="na">app</span><span class="p">:</span> <span class="k">this</span><span class="p">.</span><span class="nx">app</span> <span class="p">})</span>
   <span class="nx">actor</span><span class="p">.</span><span class="nx">attemptsTo</span><span class="p">(</span><span class="nx">interaction</span><span class="p">)</span>
 <span class="p">})</span></code></pre>
 </div>
@@ -1053,7 +1059,7 @@ This pattern is a way out of that.</p>
   <span class="na">name</span><span class="p">:</span> <span class="dl">'</span><span class="s1">actor</span><span class="dl">'</span><span class="p">,</span>
   <span class="na">regexp</span><span class="p">:</span> <span class="sr">/</span><span class="se">(</span><span class="sr">Sue|Tanya|Bob</span><span class="se">)</span><span class="sr">/</span><span class="p">,</span>
   <span class="na">transformer</span><span class="p">:</span> <span class="kd">function</span><span class="p">(</span><span class="nx">name</span><span class="p">)</span> <span class="p">{</span>
-    <span class="k">return</span> <span class="k">new</span> <span class="nx">Actor</span><span class="p">({</span> <span class="nx">name</span><span class="p">,</span> <span class="p">...</span><span class="k">this</span> <span class="p">})</span>
+    <span class="k">return</span> <span class="k">new</span> <span class="nx">Actor</span><span class="p">({</span> <span class="nx">name</span><span class="p">,</span> <span class="na">app</span><span class="p">:</span> <span class="k">this</span><span class="p">.</span><span class="nx">app</span> <span class="p">})</span>
   <span class="p">}</span>
 <span class="p">})</span></code></pre>
 </div>
