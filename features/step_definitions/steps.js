@@ -12,9 +12,18 @@ class Actor {
   }
 }
 
-Given('{word} has created an account', function (name) {
+const { defineParameterType } = require('cucumber')
+
+defineParameterType({
+  name: 'actor',
+  regexp: /(Sue|Tanya|Bob)/,
+  transformer: function(name) {
+    return new Actor({ name, app: this.app })
+  }
+})
+
+Given('{actor} has created an account', function (actor) {
   const interaction = ({ name, app }) => app.accounts[name] = new Account({ name })
-  const actor = new Actor({ name, app: this.app })
   actor.attemptsTo(interaction)
 })
 
