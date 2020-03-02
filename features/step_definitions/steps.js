@@ -3,7 +3,8 @@ const { assertThat, is, not, matchesPattern, hasItem, isEmpty } = require('hamje
 const { Account } = require('../../lib/app')
 
 Given('{word} has created an account', function (name) {
-  this.app.accounts[name] = new Account({ name })
+  const interaction = ({ name, app }) => app.accounts[name] = new Account({ name })
+  interaction({ name, app: this.app })
 })
 
 When('{word} tries to sign in', function (name) {
