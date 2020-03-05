@@ -1,4 +1,11 @@
 require 'tmpdir'
+
+task :clean do
+  Dir.chdir(Dir.tmpdir) do
+    sh("rm -rf screenplay-example")
+  end
+end
+
 namespace :docs do
   task :code do
     pwd = Dir.pwd
