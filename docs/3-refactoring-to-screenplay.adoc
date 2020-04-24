@@ -61,7 +61,7 @@ Now the code does the same as it did before. We can run `npm test` at this point
 
 Back in the first part of this series, we talked about the metaphor for Screenplay being actors on a stage.
 
-anstead of calling our interaction directly from our step definition, we're going to create an `Actor` that we'll use to do that for us.
+Instead of calling our interaction directly from our step definition, we're going to create an `Actor` that will _attempt_ the interaction.
 
 In the metaphor, the actor is said to have _abilities_: the things it needs to be able to perform the actions it's given. In practice, these are the dependencies that the interaction functions will expect to be passed, like a `browser` or a `database` connection. We'll take these as we construct the `Actor`.
 
