@@ -1198,7 +1198,7 @@ This pattern is a way out of that.</p>
 </div>
 </div>
 <div class="paragraph">
-<p>This is OK, but it&#8217;s a bit ugly. What if we could do this instead?</p>
+<p>This is OK, but it contains some duplication that makes it less readable than it could be. What if we could do this instead?</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -1267,7 +1267,7 @@ This pattern is a way out of that.</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="rouge highlight"><code data-lang="javascript"><span class="kd">const</span> <span class="nx">SignUp</span> <span class="o">=</span>
+<pre class="rouge highlight"><code data-lang="javascript"><span class="kd">const</span> <span class="nx">signUp</span> <span class="o">=</span>
   <span class="p">({</span> <span class="nx">attemptsTo</span> <span class="p">})</span> <span class="o">=&gt;</span> <span class="nx">attemptsTo</span><span class="p">(</span>
     <span class="nx">CreateAccount</span><span class="p">.</span><span class="nx">forThemselves</span><span class="p">,</span>
     <span class="nx">Activate</span><span class="p">.</span><span class="nx">theirAccount</span>
@@ -1280,7 +1280,7 @@ This pattern is a way out of that.</p>
 <div class="listingblock">
 <div class="content">
 <pre class="rouge highlight"><code data-lang="javascript"><span class="nx">Given</span><span class="p">(</span><span class="dl">'</span><span class="s1">{actor} has signed up</span><span class="dl">'</span><span class="p">,</span>
-  <span class="nx">actor</span> <span class="o">=&gt;</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">attemptsTo</span><span class="p">(</span><span class="nx">SignUp</span><span class="p">)</span>
+  <span class="nx">actor</span> <span class="o">=&gt;</span> <span class="nx">actor</span><span class="p">.</span><span class="nx">attemptsTo</span><span class="p">(</span><span class="nx">signUp</span><span class="p">)</span>
 <span class="p">)</span></code></pre>
 </div>
 </div>

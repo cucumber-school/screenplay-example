@@ -42,7 +42,7 @@ We can change the step definition above to use the two new interactions:
 include::../code/09-activate-account-interaction/features/step_definitions/steps.js[lines=50..53]
 ----
 
-This is OK, but it's a bit ugly. What if we could do this instead?
+This is OK, but it contains some duplication that makes it less readable than it could be. What if we could do this instead?
 
 [source,javascript]
 ----
@@ -73,12 +73,14 @@ include::../code/11-sign-up-task/features/step_definitions/steps.js[lines=5..18]
 
 We've added the Actor's `attemptsTo` method to the set of abilities that will be passed to the tasks or interations being attempted. To reflect the fact that the parameters in the `attemptsTo` method could be tasks or interactions, we're renamed them to the more general `actions`.
 
-This enables us to build a new `SignUp` task:
+This enables us to build a new `signUp` task:
 
 [source,javascript]
 ----
 include::../code/11-sign-up-task/features/step_definitions/steps.js[lines=42..46]
 ----
+
+You might notice we haven't used a capital letter to name this task. There's nothing special about this, we just decided not to namespace this function in an object yet because we can't imagine having any other variants of it. Perhaps someday we'll want to be able to `SignUp.usingInvalidCredentials` but we can always refactor when the time comes.
 
 Now we can use the task in our step definition:
 
@@ -89,4 +91,6 @@ include::../code/11-sign-up-task/features/step_definitions/steps.js[lines=60..62
 
 Nice. Again, we can see a clear mapping from the plain English in our scenario to the code we're running in our automation layer.
 
-The `SignUp` task has a dependency on the two interactions, but it sits as an independent function, intead of adding more bloat to a helper class. The separation between tasks and interactions gives us the potential to choose different sets of interactions to use with your tasks, depending on whether you want to interact with your app via the UI, or at a lower level.
+The `signUp` task has a dependency on the two interactions, but it sits as an independent function, intead of adding more bloat to a helper class. As our codebase grows, we'll see lots of these tiny little interaction functions growing, with tasks growing around them. Because it's made of smaller, decoupled pieces, our automation code will be easier to change.
+
+The separation between tasks and interactions gives us the potential to choose different sets of interactions to use with your tasks, depending on whether you want to interact with your app via the UI, or at a lower level. We'll look at that in a later post.
