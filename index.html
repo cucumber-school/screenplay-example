@@ -1263,7 +1263,7 @@ This pattern is a way out of that.</p>
 <p>We&#8217;ve added the Actor&#8217;s <code>attemptsTo</code> method to the set of abilities that will be passed to the tasks or interations being attempted. To reflect the fact that the parameters in the <code>attemptsTo</code> method could be tasks or interactions, we&#8217;re renamed them to the more general <code>actions</code>.</p>
 </div>
 <div class="paragraph">
-<p>This enables us to build a new <code>SignUp</code> task:</p>
+<p>This enables us to build a new <code>signUp</code> task:</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -1273,6 +1273,9 @@ This pattern is a way out of that.</p>
     <span class="nx">Activate</span><span class="p">.</span><span class="nx">theirAccount</span>
   <span class="p">)</span></code></pre>
 </div>
+</div>
+<div class="paragraph">
+<p>You might notice we haven&#8217;t used a capital letter to name this task. There&#8217;s nothing special about this, we just decided not to namespace this function in an object yet because we can&#8217;t imagine having any other variants of it. Perhaps someday we&#8217;ll want to be able to <code>SignUp.usingInvalidCredentials</code> but we can always refactor when the time comes.</p>
 </div>
 <div class="paragraph">
 <p>Now we can use the task in our step definition:</p>
@@ -1288,7 +1291,10 @@ This pattern is a way out of that.</p>
 <p>Nice. Again, we can see a clear mapping from the plain English in our scenario to the code we&#8217;re running in our automation layer.</p>
 </div>
 <div class="paragraph">
-<p>The <code>SignUp</code> task has a dependency on the two interactions, but it sits as an independent function, intead of adding more bloat to a helper class. The separation between tasks and interactions gives us the potential to choose different sets of interactions to use with your tasks, depending on whether you want to interact with your app via the UI, or at a lower level.</p>
+<p>The <code>signUp</code> task has a dependency on the two interactions, but it sits as an independent function, intead of adding more bloat to a helper class. As our codebase grows, we&#8217;ll see lots of these tiny little interaction functions growing, with tasks growing around them. Because it&#8217;s made of smaller, decoupled pieces, our automation code will be easier to change.</p>
+</div>
+<div class="paragraph">
+<p>The separation between tasks and interactions gives us the potential to choose different sets of interactions to use with your tasks, depending on whether you want to interact with your app via the UI, or at a lower level. We&#8217;ll look at that in a later post.</p>
 </div>
 </div>
 </div>
