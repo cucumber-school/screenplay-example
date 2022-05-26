@@ -48,7 +48,7 @@ GEM
     rouge (3.13.0)
     shellany (0.0.1)
     thor (1.0.1)
-    yajl-ruby (1.4.1)
+    yajl-ruby (1.4.3)
 
 PLATFORMS
   ruby
